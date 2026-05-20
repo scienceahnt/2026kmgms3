@@ -1,0 +1,1484 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>3학년 현장체험학습 안내</title>
+<style>
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body {
+    margin: 0; padding: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard", "Noto Sans KR", sans-serif;
+    background: #f4f4f1;
+    color: #2c2c2a;
+    line-height: 1.5;
+    font-size: 14px;
+    min-height: 100vh;
+  }
+  .app {
+    max-width: 480px;
+    margin: 0 auto;
+    background: #fff;
+    min-height: 100vh;
+    position: relative;
+  }
+  /* 헤더 */
+  .header {
+    background: linear-gradient(135deg, #1D9E75 0%, #0F6E56 100%);
+    color: #fff;
+    padding: 18px 18px 16px;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+  }
+  .header-school {
+    font-size: 11px;
+    opacity: 0.85;
+    letter-spacing: 0.5px;
+    margin-bottom: 2px;
+  }
+  .header-title {
+    font-size: 17px;
+    font-weight: 600;
+  }
+  .header-date {
+    font-size: 11px;
+    opacity: 0.85;
+    margin-top: 3px;
+  }
+  /* 메인 탭 */
+  .tabs {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    background: #fff;
+    border-bottom: 1px solid #e5e5e0;
+    position: sticky;
+    top: 71px;
+    z-index: 40;
+  }
+  .tab {
+    padding: 12px 4px 10px;
+    border: none;
+    background: transparent;
+    font-size: 12px;
+    color: #888780;
+    cursor: pointer;
+    font-family: inherit;
+    border-bottom: 2px solid transparent;
+    transition: all 0.15s;
+  }
+  .tab i { display: block; font-size: 18px; margin-bottom: 3px; }
+  .tab.active {
+    color: #0F6E56;
+    border-bottom-color: #0F6E56;
+    font-weight: 600;
+  }
+  /* 컨텐츠 영역 */
+  .content {
+    padding: 14px;
+    padding-bottom: 40px;
+  }
+  /* 일정표 카드 */
+  .day-tabs {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+    margin-bottom: 14px;
+    padding: 4px;
+    background: #f1efe8;
+    border-radius: 10px;
+  }
+  .day-tab {
+    padding: 8px 4px;
+    border: none;
+    background: transparent;
+    font-size: 13px;
+    color: #5f5e5a;
+    cursor: pointer;
+    font-family: inherit;
+    border-radius: 7px;
+    transition: all 0.15s;
+  }
+  .day-tab.active {
+    background: #fff;
+    color: #2c2c2a;
+    font-weight: 600;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+  }
+  .day-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    background: #e6f1fb;
+    color: #185FA5;
+    font-size: 11px;
+    font-weight: 600;
+    border-radius: 6px;
+    margin-bottom: 10px;
+  }
+  .schedule-item {
+    display: flex;
+    gap: 10px;
+    padding: 11px 13px;
+    background: #f4f4f1;
+    border-radius: 9px;
+    margin-bottom: 7px;
+  }
+  .schedule-time {
+    min-width: 50px;
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .schedule-time .end { display: block; font-size: 11px; color: #888780; font-weight: 400; }
+  .schedule-body { flex: 1; }
+  .schedule-title { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
+  .schedule-sub { font-size: 11px; color: #5f5e5a; }
+  .schedule-sub i { font-size: 11px; margin-right: 2px; }
+  /* 색상 변형 */
+  .schedule-item.green {
+    background: #E1F5EE;
+    border-left: 3px solid #1D9E75;
+  }
+  .schedule-item.green .schedule-time { color: #0F6E56; }
+  .schedule-item.green .schedule-time .end { color: #1D9E75; }
+  .schedule-item.green .schedule-title { color: #085041; }
+  .schedule-item.green .schedule-sub { color: #0F6E56; }
+  .schedule-item.purple {
+    background: #EEEDFE;
+    border-left: 3px solid #7F77DD;
+  }
+  .schedule-item.purple .schedule-time { color: #3C3489; }
+  .schedule-item.purple .schedule-time .end { color: #534AB7; }
+  .schedule-item.purple .schedule-title { color: #26215C; }
+  .schedule-item.purple .schedule-sub { color: #534AB7; }
+  .schedule-item.pink {
+    background: #FBEAF0;
+    border-left: 3px solid #D4537E;
+  }
+  .schedule-item.pink .schedule-time { color: #993556; }
+  .schedule-item.pink .schedule-time .end { color: #D4537E; }
+  .schedule-item.pink .schedule-title { color: #4B1528; }
+  .schedule-item.pink .schedule-sub { color: #993556; }
+  .schedule-item.blue {
+    background: #E6F1FB;
+    border-left: 3px solid #378ADD;
+  }
+  .schedule-item.blue .schedule-time { color: #185FA5; }
+  .schedule-item.blue .schedule-time .end { color: #378ADD; }
+  .schedule-item.blue .schedule-title { color: #042C53; }
+  .schedule-item.blue .schedule-sub { color: #185FA5; }
+  .schedule-item.amber {
+    background: #FAEEDA;
+    border-left: 3px solid #BA7517;
+  }
+  .schedule-item.amber .schedule-time { color: #854F0B; }
+  .schedule-item.amber .schedule-title { color: #412402; }
+  .schedule-item.amber .schedule-sub { color: #854F0B; }
+  .schedule-item.dim { opacity: 0.7; }
+  .badge-inline {
+    display: inline-block;
+    padding: 1px 6px;
+    background: #D4537E;
+    color: white;
+    font-size: 9px;
+    font-weight: 600;
+    border-radius: 3px;
+    letter-spacing: 0.3px;
+    margin-left: 4px;
+    vertical-align: 1px;
+  }
+  /* 동시 진행 컨테이너 */
+  .concurrent {
+    padding: 12px 12px 10px;
+    background: #f4f4f1;
+    border-radius: 9px;
+    border-left: 3px solid #7F77DD;
+    margin-bottom: 7px;
+  }
+  .concurrent-header {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  .concurrent-time { min-width: 50px; font-size: 13px; font-weight: 600; color: #3C3489; }
+  .concurrent-time .end { display: block; font-size: 11px; color: #534AB7; font-weight: 400; }
+  .concurrent-label { font-size: 10px; color: #888780; letter-spacing: 0.3px; }
+  .sub-item {
+    padding: 9px 11px;
+    background: #EEEDFE;
+    border-radius: 7px;
+    margin-bottom: 7px;
+    margin-left: 60px;
+  }
+  .sub-item .title { font-size: 12px; font-weight: 600; color: #26215C; margin-bottom: 2px; }
+  .sub-item .desc { font-size: 10px; color: #3C3489; line-height: 1.5; margin-bottom: 3px; }
+  .sub-item .loc { font-size: 10px; color: #534AB7; }
+  /* 장기자랑 라이브 */
+  .live-card {
+    display: block;
+    text-decoration: none;
+    margin-left: 60px;
+  }
+  .live-box {
+    padding: 11px 13px;
+    background: #FAECE7;
+    border-radius: 8px;
+    border: 1.5px solid #D85A30;
+  }
+  .live-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 4px;
+  }
+  .live-dot {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    background: #D85A30;
+    border-radius: 50%;
+  }
+  .live-dot.active { animation: pulse 1.2s infinite; }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+  .live-status { font-size: 10px; font-weight: 600; color: #993C1D; letter-spacing: 0.5px; }
+  .live-title { font-size: 13px; font-weight: 600; color: #4A1B0C; margin: 0 0 4px; }
+  .live-desc { font-size: 10px; color: #993C1D; margin: 0 0 8px; line-height: 1.5; }
+  .live-btn {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 11px;
+    background: #D85A30;
+    border-radius: 6px;
+  }
+  .live-btn span { font-size: 12px; font-weight: 600; color: white; }
+  .live-btn i { color: white; font-size: 13px; }
+  /* 인증 화면 */
+  .auth {
+    text-align: center;
+    padding: 40px 20px 20px;
+  }
+  .auth-icon {
+    font-size: 48px;
+    color: #1D9E75;
+    margin-bottom: 16px;
+  }
+  .auth-title {
+    font-size: 17px;
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+  .auth-desc {
+    font-size: 13px;
+    color: #5f5e5a;
+    margin-bottom: 24px;
+    line-height: 1.6;
+  }
+  .auth-form {
+    background: #f4f4f1;
+    padding: 18px;
+    border-radius: 12px;
+    text-align: left;
+  }
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  .form-field label {
+    display: block;
+    font-size: 11px;
+    color: #5f5e5a;
+    margin-bottom: 5px;
+    font-weight: 500;
+  }
+  .form-field select, .form-field input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #d3d1c7;
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: inherit;
+    background: #fff;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  .form-field select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23888780' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 32px;
+  }
+  .btn-primary {
+    width: 100%;
+    padding: 12px;
+    background: #1D9E75;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    margin-top: 4px;
+  }
+  .btn-primary:active { background: #0F6E56; }
+  .btn-secondary {
+    width: 100%;
+    padding: 10px;
+    background: transparent;
+    color: #5f5e5a;
+    border: 1px solid #d3d1c7;
+    border-radius: 8px;
+    font-size: 12px;
+    font-family: inherit;
+    cursor: pointer;
+    margin-top: 10px;
+  }
+  /* 검색 */
+  .search-section {
+    margin-bottom: 16px;
+  }
+  .search-input {
+    width: 100%;
+    padding: 11px 14px 11px 38px;
+    border: 1px solid #d3d1c7;
+    border-radius: 9px;
+    font-size: 13px;
+    background: #fff
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Ccircle cx='7' cy='7' r='5' stroke='%23888780' stroke-width='1.5' fill='none'/%3E%3Cpath d='M11 11l3 3' stroke='%23888780' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E") 12px center no-repeat;
+    font-family: inherit;
+  }
+  .search-results {
+    margin-top: 10px;
+  }
+  .result-card {
+    background: #fff;
+    border: 1px solid #e5e5e0;
+    border-radius: 10px;
+    padding: 13px 15px;
+    margin-bottom: 8px;
+  }
+  .result-name {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #2c2c2a;
+  }
+  .result-info {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .result-info .item {
+    background: #f4f4f1;
+    padding: 8px 10px;
+    border-radius: 7px;
+  }
+  .result-info .label {
+    font-size: 10px;
+    color: #888780;
+    margin-bottom: 2px;
+  }
+  .result-info .value {
+    font-size: 13px;
+    font-weight: 600;
+  }
+  /* 내 정보 표시 */
+  .my-info {
+    background: linear-gradient(135deg, #E1F5EE 0%, #f4f4f1 100%);
+    border-radius: 12px;
+    padding: 16px 18px;
+    margin-bottom: 16px;
+    border: 1px solid #C0DD97;
+  }
+  .my-info .header-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+  .my-info .label {
+    font-size: 10px;
+    color: #0F6E56;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+  }
+  .my-info .badge {
+    font-size: 14px;
+    font-weight: 700;
+    color: #085041;
+  }
+  .my-info .reset-btn {
+    background: rgba(255,255,255,0.7);
+    border: none;
+    padding: 4px 9px;
+    border-radius: 5px;
+    font-size: 10px;
+    color: #5f5e5a;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .my-info .data {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .my-info .data-item {
+    background: #fff;
+    padding: 10px 12px;
+    border-radius: 8px;
+  }
+  .my-info .data-item .data-label {
+    font-size: 10px;
+    color: #5f5e5a;
+    margin-bottom: 3px;
+  }
+  .my-info .data-item .data-value {
+    font-size: 14px;
+    font-weight: 600;
+    color: #2c2c2a;
+  }
+  /* 호차 / 방 그룹 */
+  .group-card {
+    background: #fff;
+    border: 1px solid #e5e5e0;
+    border-radius: 12px;
+    margin-bottom: 12px;
+    overflow: hidden;
+  }
+  .group-header {
+    padding: 13px 16px;
+    background: #f4f4f1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .group-title {
+    font-size: 14px;
+    font-weight: 600;
+  }
+  .group-meta {
+    font-size: 11px;
+    color: #5f5e5a;
+    margin-top: 2px;
+  }
+  .group-count {
+    font-size: 11px;
+    color: #5f5e5a;
+    background: #fff;
+    padding: 2px 8px;
+    border-radius: 10px;
+  }
+  .group-body {
+    padding: 12px 16px;
+  }
+  .driver-info {
+    background: #fffbf0;
+    border: 1px dashed #EF9F27;
+    padding: 10px 12px;
+    border-radius: 8px;
+    margin-bottom: 12px;
+    font-size: 12px;
+    color: #854F0B;
+    line-height: 1.6;
+    white-space: pre-wrap;
+  }
+  .driver-info-empty {
+    background: #f4f4f1;
+    color: #888780;
+    padding: 8px 12px;
+    border-radius: 8px;
+    margin-bottom: 12px;
+    font-size: 11px;
+    text-align: center;
+    font-style: italic;
+  }
+  .member-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+  }
+  .member-chip {
+    background: #f4f4f1;
+    border-radius: 6px;
+    padding: 7px 4px;
+    text-align: center;
+    font-size: 11px;
+    color: #2c2c2a;
+  }
+  .member-chip.leader {
+    background: #FBEAF0;
+    color: #4B1528;
+    font-weight: 600;
+  }
+  .member-chip .star { color: #D4537E; }
+  /* 방별 */
+  .building-tabs {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+    margin-bottom: 14px;
+    padding: 4px;
+    background: #f1efe8;
+    border-radius: 10px;
+  }
+  .building-tab {
+    padding: 8px 4px;
+    border: none;
+    background: transparent;
+    font-size: 13px;
+    color: #5f5e5a;
+    cursor: pointer;
+    font-family: inherit;
+    border-radius: 7px;
+  }
+  .building-tab.active {
+    background: #fff;
+    color: #2c2c2a;
+    font-weight: 600;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+  }
+  /* 라이브 탭 */
+  .live-tab-content {
+    text-align: center;
+    padding: 30px 16px;
+  }
+  .live-tab-icon {
+    font-size: 56px;
+    color: #D85A30;
+    margin-bottom: 12px;
+  }
+  .live-tab-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: #4A1B0C;
+    margin-bottom: 8px;
+  }
+  .live-tab-time {
+    display: inline-block;
+    padding: 6px 14px;
+    background: #FAECE7;
+    color: #993C1D;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 20px;
+  }
+  .live-tab-status {
+    background: #f4f4f1;
+    padding: 14px 18px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    font-size: 14px;
+    color: #5f5e5a;
+  }
+  .live-tab-status.now { background: #FAECE7; color: #993C1D; font-weight: 600; }
+  .live-tab-status.ended { background: #f1efe8; color: #888780; }
+  .live-tab-btn {
+    display: inline-block;
+    width: 100%;
+    padding: 16px;
+    background: #D85A30;
+    color: white;
+    text-decoration: none;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(216, 90, 48, 0.25);
+  }
+  .live-tab-btn.disabled {
+    background: #d3d1c7;
+    color: #888780;
+    box-shadow: none;
+    pointer-events: none;
+  }
+  .live-tab-info {
+    margin-top: 24px;
+    text-align: left;
+    background: #f4f4f1;
+    padding: 14px 16px;
+    border-radius: 10px;
+    font-size: 12px;
+    color: #5f5e5a;
+    line-height: 1.7;
+  }
+  .live-tab-info strong { color: #2c2c2a; }
+  /* 로딩 */
+  .loading {
+    text-align: center;
+    padding: 40px 20px;
+    color: #888780;
+    font-size: 13px;
+  }
+  /* 빈 상태 */
+  .empty {
+    text-align: center;
+    padding: 30px 20px;
+    color: #888780;
+    font-size: 12px;
+  }
+  /* 알림 */
+  .notice {
+    font-size: 11px;
+    color: #888780;
+    text-align: center;
+    margin-top: 18px;
+    line-height: 1.6;
+  }
+  /* 숨김 */
+  .hidden { display: none !important; }
+</style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.47.0/tabler-icons.min.css">
+</head>
+<body>
+<div class="app">
+
+  <!-- 헤더 -->
+  <div class="header">
+    <div class="header-school">경민여자중학교</div>
+    <div class="header-title">3학년 현장체험학습</div>
+    <div class="header-date">2026년 5월 27일(수) ~ 5월 29일(금)</div>
+  </div>
+
+  <!-- 메인 탭 -->
+  <div class="tabs">
+    <button class="tab active" data-tab="schedule"><i class="ti ti-calendar-event"></i>일정</button>
+    <button class="tab" data-tab="bus"><i class="ti ti-bus"></i>호차</button>
+    <button class="tab" data-tab="room"><i class="ti ti-bed"></i>숙소</button>
+    <button class="tab" data-tab="live"><i class="ti ti-broadcast"></i>라이브</button>
+  </div>
+
+  <!-- 컨텐츠: 일정표 -->
+  <div class="content" id="panel-schedule">
+
+    <!-- 일차 탭 -->
+    <div class="day-tabs">
+      <button class="day-tab active" data-day="1">1일차</button>
+      <button class="day-tab" data-day="2">2일차</button>
+      <button class="day-tab" data-day="3">3일차</button>
+    </div>
+
+    <!-- 1일차 -->
+    <div class="day-panel" id="day-1">
+      <div class="day-badge">5월 27일 (수) · 1일차</div>
+
+      <div class="schedule-item">
+        <div class="schedule-time">08:30</div>
+        <div class="schedule-body">
+          <div class="schedule-title">학교 집합 및 출발</div>
+          <div class="schedule-sub"><i class="ti ti-map-pin"></i>대운동장</div>
+        </div>
+      </div>
+
+      <div class="schedule-item pink">
+        <div class="schedule-time">10:30<span class="end">~11:30</span></div>
+        <div class="schedule-body">
+          <div class="schedule-title">점심식사<span class="badge-inline">모둠별</span></div>
+          <div class="schedule-sub"><i class="ti ti-users"></i>친구들끼리 · 부여백제휴게소</div>
+        </div>
+      </div>
+
+      <div class="schedule-item">
+        <div class="schedule-time">11:30<span class="end">~13:00</span></div>
+        <div class="schedule-body">
+          <div class="schedule-title">이동</div>
+          <div class="schedule-sub"><i class="ti ti-bus"></i>선유도해수욕장으로</div>
+        </div>
+      </div>
+
+      <div class="schedule-item green">
+        <div class="schedule-time">13:00<span class="end">~16:00</span></div>
+        <div class="schedule-body">
+          <div class="schedule-title">해양 생태체험</div>
+          <div class="schedule-sub">선유도해수욕장 · 짚라인, 지역 경제 교육</div>
+        </div>
+      </div>
+
+      <div class="schedule-item">
+        <div class="schedule-time">17:00<span class="end">~17:30</span></div>
+        <div class="schedule-body">
+          <div class="schedule-title">숙소 도착 및 배정</div>
+          <div class="schedule-sub"><i class="ti ti-map-pin"></i>국립서천생태원</div>
+        </div>
+      </div>
+
+      <div class="schedule-item">
+        <div class="schedule-time">17:30<span class="end">~19:00</span></div>
+        <div class="schedule-body">
+          <div class="schedule-title">저녁 식사 및 휴식</div>
+          <div class="schedule-sub"><i class="ti ti-map-pin"></i>구내식당</div>
+        </div>
+      </div>
+
+      <!-- 동시 진행 -->
+      <div class="concurrent">
+        <div class="concurrent-header">
+          <div class="concurrent-time">19:00<span class="end">~21:00</span></div>
+          <div class="concurrent-label">동시 진행</div>
+        </div>
+        <div class="sub-item">
+          <div class="title"><i class="ti ti-school"></i> AI·디지털 맞춤형 교육 특강</div>
+          <div class="desc">안전교육·오리엔테이션, 질문하는 방법, 경제금융, AI·디지털, 하이러닝</div>
+          <div class="loc"><i class="ti ti-map-pin"></i> 생태교육관 강당</div>
+        </div>
+        <a class="live-card" href="#" id="live-link-schedule" data-zoom>
+          <div class="live-box">
+            <div class="live-header">
+              <span class="live-dot" id="live-dot-schedule"></span>
+              <span class="live-status" id="live-status-schedule">LIVE · 19:30 시작</span>
+            </div>
+            <div class="live-title"><i class="ti ti-microphone"></i> 장기자랑 라이브</div>
+            <div class="live-desc">집에서도 함께 응원해주세요!</div>
+            <div class="live-btn">
+              <span><i class="ti ti-video"></i> Zoom으로 입장하기</span>
+              <i class="ti ti-arrow-right"></i>
+            </div>
+          </div>
+        </a>
+      </div>
+
+      <div class="schedule-item">
+        <div class="schedule-time">21:00<span class="end">~22:30</span></div>
+        <div class="schedule-body">
+          <div class="schedule-title">간식</div>
+          <div class="schedule-sub">햄버거 · 감자튀김</div>
+        </div>
+      </div>
+
+      <div class="schedule-item dim">
+        <div class="schedule-time">22:30<span class="end">~</span></div>
+        <div class="schedule-body">
+          <div class="schedule-title"><i class="ti ti-moon"></i> 세면 및 취침</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2일차 -->
+    <div class="day-panel hidden" id="day-2">
+      <div class="day-badge">5월 28일 (목) · 2일차</div>
+
+      <div class="schedule-item dim">
+        <div class="schedule-time">07:00<span class="end">~08:00</span></div>
+        <div class="schedule-body">
+          <div class="schedule-title"><i class="ti ti-sun"></i> 기상 및 세면</div>
+        </div>
+      </div>
+
+      <div class="schedule-item">
+        <div class="schedule-time">08:00<span class="end">~08:30</span></div>
+        <div class="schedule-body">
+          <div class="schedule-title">아침 식사</div>
+          <div class="schedule-sub"><i class="ti ti-map-pin"></i>구내식당</div>
+        </div>
+      </div>
+
+      <div class="schedule-item">
+        <div class="schedule-time">09:00<span class="end">~09:50</span></div>
+        <div class="schedule-body">
+          <div class="schedule-title">이동 및 에코리움 입장</div>
+          <div class="schedule-sub"><i class="ti ti-map-pin"></i>정문매표소 → 에코리움 (3분반)</div>
+        </div>
+      </div>
+
+      <div class="schedule-item green">
+        <div class="schedule-time">09:50<span class="end">~11:50</span></div>
+        <div class="schedule-body">
+          <div class="schedule-title">에코리움 투어</div>
+          <div class="schedule-sub">에코리움 기후대관 여행</div>
+        </div>
+      </div>
+
+      <div class="schedule-item">
+        <div class="schedule-time">11:50<span class="end">~13:00</span></div>
+        <div class="schedule-body">
+          <div class="schedule-title">점심 식사</div>
+          <div class="schedule-sub"><i class="ti ti-map-pin"></i>에코리움</div>
+        </div>
+      </div>
+
+      <div class="schedule-item green">
+        <div class="schedule-time">13:00<span class="end">~17:00</span></div>
+        <div class="schedule-body">
+          <div class="schedule-title">생태학자(곤충)와 함께하는 생태체험</div>
+          <div class="schedule-sub">이론 → 체험 → 모둠별 활동 → 설문지 작성<br>실내: 에듀테인홀, 에코랩, 강달이교실 / 실외: 용화실못, 한반도숲</div>
+        </div>
+      </div>
+
+      <div class="schedule-item">
+        <div class="schedule-time">17:00<span class="end">~17:30</span></div>
+        <div class="schedule-body">
+          <div class="schedule-title">이동</div>
+          <div class="schedule-sub"><i class="ti ti-bus"></i>정문 → 교육생활관</div>
+        </div>
+      </div>
+
+      <div class="schedule-item">
+        <div class="schedule-time">18:00<span class="end">~19:00</span></div>
+        <div class="schedule-body">
+          <div class="schedule-title">저녁 식사</div>
+          <div class="schedule-sub"><i class="ti ti-map-pin"></i>구내식당</div>
+        </div>
+      </div>
+
+      <div class="schedule-item amber">
+        <div class="schedule-time">19:00~</div>
+        <div class="schedule-body">
+          <div class="schedule-title"><i class="ti ti-search"></i> 보물찾기</div>
+          <div class="schedule-sub">간단한 미니 이벤트로 진행</div>
+        </div>
+      </div>
+
+      <div class="schedule-item blue">
+        <div class="schedule-time">19:00<span class="end">~20:00</span></div>
+        <div class="schedule-body">
+          <div class="schedule-title"><i class="ti ti-coffee"></i> 자유시간</div>
+          <div class="schedule-sub">충분한 휴식의 시간</div>
+        </div>
+      </div>
+
+      <div class="schedule-item">
+        <div class="schedule-time">20:30<span class="end">~21:30</span></div>
+        <div class="schedule-body">
+          <div class="schedule-title">간식 및 휴식</div>
+          <div class="schedule-sub">치킨 · 떡볶이</div>
+        </div>
+      </div>
+
+      <div class="schedule-item">
+        <div class="schedule-time">21:30<span class="end">~22:30</span></div>
+        <div class="schedule-body">
+          <div class="schedule-title">자유시간</div>
+        </div>
+      </div>
+
+      <div class="schedule-item dim">
+        <div class="schedule-time">22:30<span class="end">~</span></div>
+        <div class="schedule-body">
+          <div class="schedule-title"><i class="ti ti-moon"></i> 세면 및 취침</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3일차 -->
+    <div class="day-panel hidden" id="day-3">
+      <div class="day-badge">5월 29일 (금) · 3일차</div>
+
+      <div class="schedule-item dim">
+        <div class="schedule-time">07:00<span class="end">~08:00</span></div>
+        <div class="schedule-body">
+          <div class="schedule-title"><i class="ti ti-sun"></i> 기상 및 세면</div>
+        </div>
+      </div>
+
+      <div class="schedule-item">
+        <div class="schedule-time">08:00<span class="end">~08:30</span></div>
+        <div class="schedule-body">
+          <div class="schedule-title">아침 식사</div>
+          <div class="schedule-sub"><i class="ti ti-map-pin"></i>구내식당</div>
+        </div>
+      </div>
+
+      <div class="schedule-item">
+        <div class="schedule-time">08:30<span class="end">~09:00</span></div>
+        <div class="schedule-body">
+          <div class="schedule-title">짐 정리 및 퇴실</div>
+          <div class="schedule-sub"><i class="ti ti-bus"></i>군산으로 이동 (10분 소요)</div>
+        </div>
+      </div>
+
+      <div class="schedule-item green">
+        <div class="schedule-time">09:10<span class="end">~13:30</span></div>
+        <div class="schedule-body">
+          <div class="schedule-title">군산근대박물관 · 시간여행마을</div>
+          <div class="schedule-sub">자유 관람 및 체험<br>AI·디지털 기반 프로그램: 질문하기 / 지역경제</div>
+        </div>
+      </div>
+
+      <div class="schedule-item pink" style="margin-left: 16px;">
+        <div class="schedule-time" style="min-width: 36px;"><i class="ti ti-arrow-right"></i></div>
+        <div class="schedule-body">
+          <div class="schedule-title">점심식사 (군산 일대)<span class="badge-inline">모둠별</span></div>
+          <div class="schedule-sub"><i class="ti ti-users"></i>친구들끼리 자유 식사</div>
+        </div>
+      </div>
+
+      <div class="schedule-item blue">
+        <div class="schedule-time">16:30</div>
+        <div class="schedule-body">
+          <div class="schedule-title"><i class="ti ti-home"></i> 학교 도착 및 해산</div>
+          <div class="schedule-sub">3일간의 일정 마무리</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="notice">※ 상기 일정은 기상 및 현지사정에 의하여 변경될 수 있습니다</div>
+  </div>
+
+  <!-- 컨텐츠: 호차 -->
+  <div class="content hidden" id="panel-bus">
+    <div id="bus-loading" class="loading">
+      <i class="ti ti-loader" style="font-size: 24px;"></i>
+      <div style="margin-top: 8px;">명단을 불러오는 중...</div>
+    </div>
+    <div id="bus-content" class="hidden"></div>
+  </div>
+
+  <!-- 컨텐츠: 숙소 -->
+  <div class="content hidden" id="panel-room">
+    <div id="room-loading" class="loading">
+      <i class="ti ti-loader" style="font-size: 24px;"></i>
+      <div style="margin-top: 8px;">명단을 불러오는 중...</div>
+    </div>
+    <div id="room-content" class="hidden">
+      <div class="building-tabs">
+        <button class="building-tab active" data-bld="1">1동</button>
+        <button class="building-tab" data-bld="2">2동</button>
+        <button class="building-tab" data-bld="3">3동</button>
+        <button class="building-tab" data-bld="4">4동</button>
+      </div>
+      <div id="room-list"></div>
+    </div>
+  </div>
+
+  <!-- 컨텐츠: 라이브 -->
+  <div class="content hidden" id="panel-live">
+    <div class="live-tab-content">
+      <div class="live-tab-icon"><i class="ti ti-microphone"></i></div>
+      <div class="live-tab-title">장기자랑 라이브</div>
+      <div class="live-tab-time">5월 27일 (수) 19:30 ~ 21:00</div>
+
+      <div class="live-tab-status" id="live-tab-status">
+        곧 시작됩니다. 19:30에 다시 와주세요!
+      </div>
+
+      <a class="live-tab-btn disabled" id="live-tab-btn" href="#" data-zoom>
+        <i class="ti ti-video"></i> Zoom으로 입장하기
+      </a>
+
+      <div class="live-tab-info">
+        <strong><i class="ti ti-info-circle"></i> 시청 안내</strong><br>
+        · 위 버튼을 누르면 Zoom 앱이 열립니다<br>
+        · Zoom 앱이 없으면 자동으로 웹에서 열립니다<br>
+        · 음성 없이도 영상 시청이 가능합니다<br>
+        · 자녀 응원 메시지는 채팅으로 보내주세요
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- 인증 모달 -->
+<div id="auth-modal" class="hidden" style="position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 100; display: flex; align-items: center; justify-content: center; padding: 20px;">
+  <div style="background: #fff; border-radius: 16px; padding: 24px; width: 100%; max-width: 360px;">
+    <div class="auth-icon" style="text-align: center;"><i class="ti ti-user-search"></i></div>
+    <div class="auth-title" style="text-align: center;">본인 정보 조회</div>
+    <div class="auth-desc" style="text-align: center;">반과 번호를 입력하면<br>나의 호차와 숙소를 확인할 수 있어요</div>
+
+    <div class="form-row">
+      <div class="form-field">
+        <label>반</label>
+        <select id="auth-class">
+          <option value="">선택</option>
+          <option value="1">3학년 1반</option>
+          <option value="2">3학년 2반</option>
+          <option value="3">3학년 3반</option>
+          <option value="4">3학년 4반</option>
+        </select>
+      </div>
+      <div class="form-field">
+        <label>번호</label>
+        <input type="number" id="auth-number" placeholder="번호" min="1" max="30" inputmode="numeric">
+      </div>
+    </div>
+
+    <button class="btn-primary" id="auth-submit">확인</button>
+    <div id="auth-error" class="hidden" style="margin-top: 10px; padding: 10px; background: #FCEBEB; color: #A32D2D; border-radius: 8px; font-size: 12px; text-align: center;">
+      해당 학생을 찾을 수 없습니다. 다시 확인해주세요.
+    </div>
+
+    <div style="margin-top: 16px; text-align: center;">
+      <button class="btn-secondary" id="auth-skip">전체 정보만 둘러보기 →</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============ 설정: CSV URL ============
+const SHEET_URLS = {
+  master: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSTxRk-K6oJYaG-nMzN743wV7MY1cRKzIdCRN9GHNFMdV-iK_s6bG42wWtpTwmHAPTYFP3MkeNIhXKj/pub?gid=267614984&single=true&output=csv",
+  bus: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSTxRk-K6oJYaG-nMzN743wV7MY1cRKzIdCRN9GHNFMdV-iK_s6bG42wWtpTwmHAPTYFP3MkeNIhXKj/pub?gid=1082318930&single=true&output=csv",
+  room: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSTxRk-K6oJYaG-nMzN743wV7MY1cRKzIdCRN9GHNFMdV-iK_s6bG42wWtpTwmHAPTYFP3MkeNIhXKj/pub?gid=1162533241&single=true&output=csv"
+};
+
+// ============ 줌 링크 (시트에 별도 컬럼 만들기 전까지 여기서 수정) ============
+const ZOOM_LINK = "https://zoom.us/"; // 실제 줌 링크로 교체
+const LIVE_START = new Date("2026-05-27T19:30:00+09:00");
+const LIVE_END = new Date("2026-05-27T21:00:00+09:00");
+
+// ============ CSV 파서 ============
+function parseCSV(text) {
+  const rows = [];
+  let row = [], cell = '', inQuote = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i], n = text[i+1];
+    if (inQuote) {
+      if (c === '"' && n === '"') { cell += '"'; i++; }
+      else if (c === '"') { inQuote = false; }
+      else { cell += c; }
+    } else {
+      if (c === '"') { inQuote = true; }
+      else if (c === ',') { row.push(cell); cell = ''; }
+      else if (c === '\n') { row.push(cell); rows.push(row); row = []; cell = ''; }
+      else if (c === '\r') { /* skip */ }
+      else { cell += c; }
+    }
+  }
+  if (cell || row.length) { row.push(cell); rows.push(row); }
+  return rows;
+}
+
+// 헤더가 있는 시트를 객체 배열로 변환
+function csvToObjects(text, headerRowIndex = 0) {
+  const rows = parseCSV(text).filter(r => r.some(c => c && c.trim()));
+  if (rows.length <= headerRowIndex) return [];
+  const headers = rows[headerRowIndex].map(h => (h || '').trim());
+  return rows.slice(headerRowIndex + 1).map(r => {
+    const obj = {};
+    headers.forEach((h, i) => { obj[h] = (r[i] || '').trim(); });
+    return obj;
+  });
+}
+
+// ============ 데이터 로딩 ============
+let DATA = { master: [], bus: [], room: [] };
+
+async function loadData() {
+  try {
+    const [masterText, busText, roomText] = await Promise.all([
+      fetch(SHEET_URLS.master).then(r => r.text()),
+      fetch(SHEET_URLS.bus).then(r => r.text()),
+      fetch(SHEET_URLS.room).then(r => r.text())
+    ]);
+    // 수련생명부 - 첫 행은 제목, 두번째 행이 헤더일 수 있음. 양쪽 다 시도
+    DATA.master = tryParse(masterText);
+    DATA.bus = tryParse(busText);
+    DATA.room = tryParse(roomText);
+    return true;
+  } catch (e) {
+    console.error("데이터 로딩 실패", e);
+    return false;
+  }
+}
+
+function tryParse(text) {
+  // 헤더 행 자동 감지: "반" 또는 "학년"이 포함된 행을 찾음
+  const rows = parseCSV(text).filter(r => r.some(c => c && c.trim()));
+  let headerIdx = 0;
+  for (let i = 0; i < Math.min(5, rows.length); i++) {
+    if (rows[i].some(c => c === '학년' || c === '반' || c === '번호')) {
+      headerIdx = i;
+      break;
+    }
+  }
+  const headers = rows[headerIdx].map(h => (h || '').trim());
+  return rows.slice(headerIdx + 1).map(r => {
+    const obj = {};
+    headers.forEach((h, i) => { obj[h] = (r[i] || '').trim(); });
+    return obj;
+  }).filter(o => o['반'] || o['번호'] || o['성 명'] || o['성명']);
+}
+
+// 학생 객체에서 정보 추출 (헤더 이름 변형 대응)
+function pick(obj, ...keys) {
+  for (const k of keys) {
+    if (obj[k] !== undefined && obj[k] !== '') return obj[k];
+  }
+  return '';
+}
+function getCls(s) { return pick(s, '반'); }
+function getNum(s) { return pick(s, '번호'); }
+function getName(s) { return pick(s, '성 명', '성명', '이름'); }
+function getBus(s) { return pick(s, '버스 탑승 호차', '호차', '버스호차'); }
+function getRoom(s) { return pick(s, '숙소배정', '숙소', '방'); }
+function getJoin(s) { return pick(s, '참가여부'); }
+function isLeader(s) { return pick(s, '방장') === 'O' || pick(s, '방장') === '★' || pick(s, '방장') === 'TRUE'; }
+function getDriver(s) { return pick(s, '배차'); }
+
+// ============ 메인 탭 전환 ============
+document.querySelectorAll('.tab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+    ['schedule', 'bus', 'room', 'live'].forEach(name => {
+      document.getElementById('panel-' + name).classList.add('hidden');
+    });
+    document.getElementById('panel-' + btn.dataset.tab).classList.remove('hidden');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+});
+
+// ============ 일정 탭 - 일차 전환 ============
+document.querySelectorAll('.day-tab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.day-tab').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+    [1, 2, 3].forEach(n => document.getElementById('day-' + n).classList.add('hidden'));
+    document.getElementById('day-' + btn.dataset.day).classList.remove('hidden');
+  });
+});
+
+// ============ 인증 ============
+const STORAGE_KEY = 'fieldtrip_auth_2026';
+
+function getStoredAuth() {
+  try {
+    const v = sessionStorage.getItem(STORAGE_KEY);
+    return v ? JSON.parse(v) : null;
+  } catch { return null; }
+}
+function setStoredAuth(v) {
+  try { sessionStorage.setItem(STORAGE_KEY, JSON.stringify(v)); } catch {}
+}
+function clearStoredAuth() {
+  try { sessionStorage.removeItem(STORAGE_KEY); } catch {}
+}
+
+function showAuthModal() {
+  document.getElementById('auth-modal').classList.remove('hidden');
+}
+function hideAuthModal() {
+  document.getElementById('auth-modal').classList.add('hidden');
+}
+
+document.getElementById('auth-submit').addEventListener('click', () => {
+  const cls = document.getElementById('auth-class').value;
+  const num = document.getElementById('auth-number').value;
+  const errEl = document.getElementById('auth-error');
+
+  if (!cls || !num) {
+    errEl.textContent = '반과 번호를 모두 입력해주세요.';
+    errEl.classList.remove('hidden');
+    return;
+  }
+
+  const student = DATA.master.find(s =>
+    getCls(s) === cls && getNum(s) === String(parseInt(num, 10))
+  );
+
+  if (!student) {
+    errEl.textContent = '해당 학생을 찾을 수 없습니다. 다시 확인해주세요.';
+    errEl.classList.remove('hidden');
+    return;
+  }
+  if (getJoin(student) !== 'O') {
+    errEl.textContent = '미참가 학생입니다. 담임선생님께 문의해주세요.';
+    errEl.classList.remove('hidden');
+    return;
+  }
+
+  setStoredAuth({ cls, num: String(parseInt(num, 10)) });
+  errEl.classList.add('hidden');
+  hideAuthModal();
+  renderBus();
+  renderRoom();
+});
+
+document.getElementById('auth-skip').addEventListener('click', () => {
+  setStoredAuth({ skip: true });
+  hideAuthModal();
+  renderBus();
+  renderRoom();
+});
+
+// ============ 호차 렌더링 ============
+function renderBus() {
+  const container = document.getElementById('bus-content');
+  document.getElementById('bus-loading').classList.add('hidden');
+  container.classList.remove('hidden');
+
+  const auth = getStoredAuth();
+  let html = '';
+
+  // 내 정보 카드
+  if (auth && !auth.skip) {
+    const me = DATA.master.find(s => getCls(s) === auth.cls && getNum(s) === auth.num);
+    if (me) {
+      html += `
+        <div class="my-info">
+          <div class="header-row">
+            <div>
+              <div class="label">내 정보</div>
+              <div class="badge">3-${getCls(me)} / ${getNum(me)}번</div>
+            </div>
+            <button class="reset-btn" onclick="logout()">변경</button>
+          </div>
+          <div class="data">
+            <div class="data-item">
+              <div class="data-label"><i class="ti ti-bus"></i> 버스 호차</div>
+              <div class="data-value">${getBus(me) || '-'}</div>
+            </div>
+            <div class="data-item">
+              <div class="data-label"><i class="ti ti-bed"></i> 숙소</div>
+              <div class="data-value">${getRoom(me) || '-'}</div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+  }
+
+  // 호차별 그룹
+  const busGroups = {};
+  DATA.master.forEach(s => {
+    if (getJoin(s) !== 'O') return;
+    const b = getBus(s);
+    if (!b) return;
+    if (!busGroups[b]) busGroups[b] = [];
+    busGroups[b].push(s);
+  });
+
+  // 배차 정보 추출 (호차별명부에서)
+  const drivers = {};
+  DATA.bus.forEach(r => {
+    const b = getBus(r);
+    const d = getDriver(r);
+    if (b && d && !drivers[b]) drivers[b] = d;
+  });
+
+  ['1호차', '2호차', '3호차'].forEach(busName => {
+    const members = busGroups[busName] || [];
+    members.sort((a, b) => {
+      const c = parseInt(getCls(a)) - parseInt(getCls(b));
+      if (c !== 0) return c;
+      return parseInt(getNum(a)) - parseInt(getNum(b));
+    });
+
+    html += `
+      <div class="group-card">
+        <div class="group-header">
+          <div>
+            <div class="group-title"><i class="ti ti-bus"></i> ${busName}</div>
+          </div>
+          <div class="group-count">${members.length}명</div>
+        </div>
+        <div class="group-body">
+          ${drivers[busName]
+            ? `<div class="driver-info">${drivers[busName]}</div>`
+            : `<div class="driver-info-empty">배차 정보가 곧 업데이트됩니다</div>`}
+          <div class="member-grid">
+            ${members.map(s => {
+              const auth = getStoredAuth();
+              const isMe = auth && !auth.skip && getCls(s) === auth.cls && getNum(s) === auth.num;
+              return `<div class="member-chip" ${isMe ? 'style="background:#FAEEDA;color:#854F0B;font-weight:600;"' : ''}>${getCls(s)}-${String(getNum(s)).padStart(2,'0')}</div>`;
+            }).join('')}
+          </div>
+        </div>
+      </div>
+    `;
+  });
+
+  container.innerHTML = html;
+}
+
+// ============ 숙소 렌더링 ============
+function renderRoom() {
+  const container = document.getElementById('room-content');
+  document.getElementById('room-loading').classList.add('hidden');
+  container.classList.remove('hidden');
+
+  // 동 탭 클릭
+  container.querySelectorAll('.building-tab').forEach(btn => {
+    btn.onclick = () => {
+      container.querySelectorAll('.building-tab').forEach(t => t.classList.remove('active'));
+      btn.classList.add('active');
+      renderRoomList(btn.dataset.bld);
+    };
+  });
+
+  // 내 정보가 있으면 해당 동으로 자동 이동
+  const auth = getStoredAuth();
+  let initBld = '2';
+  if (auth && !auth.skip) {
+    const me = DATA.master.find(s => getCls(s) === auth.cls && getNum(s) === auth.num);
+    if (me) {
+      const m = getRoom(me).match(/(\d)동/);
+      if (m) initBld = m[1];
+    }
+  }
+  container.querySelectorAll('.building-tab').forEach(t => {
+    t.classList.toggle('active', t.dataset.bld === initBld);
+  });
+  renderRoomList(initBld);
+}
+
+function renderRoomList(bld) {
+  const listEl = document.getElementById('room-list');
+  const auth = getStoredAuth();
+
+  // 내 정보 카드 (방 기준)
+  let html = '';
+  if (auth && !auth.skip) {
+    const me = DATA.master.find(s => getCls(s) === auth.cls && getNum(s) === auth.num);
+    if (me && getRoom(me)) {
+      html += `
+        <div class="my-info">
+          <div class="header-row">
+            <div>
+              <div class="label">내 방</div>
+              <div class="badge">${getRoom(me)}</div>
+            </div>
+            <button class="reset-btn" onclick="logout()">변경</button>
+          </div>
+          <div class="data">
+            <div class="data-item">
+              <div class="data-label"><i class="ti ti-user"></i> 반/번호</div>
+              <div class="data-value">3-${getCls(me)} / ${getNum(me)}번</div>
+            </div>
+            <div class="data-item">
+              <div class="data-label"><i class="ti ti-bus"></i> 버스 호차</div>
+              <div class="data-value">${getBus(me) || '-'}</div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+  }
+
+  // 해당 동의 방별로 그룹화
+  const roomGroups = {};
+  DATA.master.forEach(s => {
+    if (getJoin(s) !== 'O') return;
+    const r = getRoom(s);
+    if (!r || !r.startsWith(bld + '동')) return;
+    if (!roomGroups[r]) roomGroups[r] = [];
+    roomGroups[r].push(s);
+  });
+
+  const sortedRooms = Object.keys(roomGroups).sort();
+
+  if (sortedRooms.length === 0) {
+    html += `<div class="empty">${bld}동에 배정된 방이 없습니다</div>`;
+    listEl.innerHTML = html;
+    return;
+  }
+
+  sortedRooms.forEach(roomName => {
+    const members = roomGroups[roomName];
+    members.sort((a, b) => {
+      const c = parseInt(getCls(a)) - parseInt(getCls(b));
+      if (c !== 0) return c;
+      return parseInt(getNum(a)) - parseInt(getNum(b));
+    });
+    const hasLeader = members.some(m => isLeader(m));
+
+    html += `
+      <div class="group-card">
+        <div class="group-header">
+          <div>
+            <div class="group-title"><i class="ti ti-bed"></i> ${roomName.replace(bld + '동 ', '')}</div>
+          </div>
+          <div class="group-count">${members.length}명</div>
+        </div>
+        <div class="group-body">
+          <div class="member-grid">
+            ${members.map(s => {
+              const leader = isLeader(s);
+              const isMe = auth && !auth.skip && getCls(s) === auth.cls && getNum(s) === auth.num;
+              let style = '';
+              if (isMe) style = 'background:#FAEEDA;color:#854F0B;font-weight:600;';
+              return `<div class="member-chip ${leader ? 'leader' : ''}" ${style ? `style="${style}"` : ''}>${leader ? '<span class="star">★</span> ' : ''}${getCls(s)}-${String(getNum(s)).padStart(2,'0')}</div>`;
+            }).join('')}
+          </div>
+          ${hasLeader ? '<div style="margin-top: 10px; font-size: 10px; color: #888780;">★ 방장</div>' : ''}
+        </div>
+      </div>
+    `;
+  });
+
+  listEl.innerHTML = html;
+}
+
+function logout() {
+  clearStoredAuth();
+  document.getElementById('auth-class').value = '';
+  document.getElementById('auth-number').value = '';
+  showAuthModal();
+}
+
+// ============ 줌 링크 적용 ============
+function applyZoomLink() {
+  document.querySelectorAll('[data-zoom]').forEach(el => {
+    el.href = ZOOM_LINK;
+    el.target = '_blank';
+    el.rel = 'noopener';
+  });
+}
+
+// ============ 라이브 상태 ============
+function updateLiveStatus() {
+  const now = new Date();
+
+  // 일정 탭 안의 라이브 카드
+  const dotS = document.getElementById('live-dot-schedule');
+  const statusS = document.getElementById('live-status-schedule');
+
+  // 라이브 탭
+  const statusT = document.getElementById('live-tab-status');
+  const btnT = document.getElementById('live-tab-btn');
+
+  if (now < LIVE_START) {
+    if (statusS) statusS.textContent = 'LIVE · 19:30 시작';
+    if (dotS) dotS.classList.remove('active');
+    if (statusT) {
+      statusT.textContent = '곧 시작됩니다. 19:30에 다시 와주세요!';
+      statusT.className = 'live-tab-status';
+    }
+    if (btnT) btnT.classList.add('disabled');
+  } else if (now >= LIVE_START && now < LIVE_END) {
+    if (statusS) statusS.textContent = '● 지금 진행중';
+    if (dotS) dotS.classList.add('active');
+    if (statusT) {
+      statusT.innerHTML = '<i class="ti ti-broadcast"></i> 지금 진행중입니다!';
+      statusT.className = 'live-tab-status now';
+    }
+    if (btnT) btnT.classList.remove('disabled');
+  } else {
+    if (statusS) statusS.textContent = '라이브 종료';
+    if (dotS) dotS.classList.remove('active');
+    if (statusT) {
+      statusT.textContent = '라이브가 종료되었습니다. 시청해주셔서 감사합니다!';
+      statusT.className = 'live-tab-status ended';
+    }
+    if (btnT) btnT.classList.add('disabled');
+  }
+}
+
+// ============ 시작 ============
+(async () => {
+  applyZoomLink();
+  updateLiveStatus();
+  setInterval(updateLiveStatus, 30000);
+
+  const ok = await loadData();
+  if (!ok) {
+    document.getElementById('bus-loading').innerHTML = '데이터를 불러올 수 없습니다.<br>잠시 후 다시 시도해주세요.';
+    document.getElementById('room-loading').innerHTML = '데이터를 불러올 수 없습니다.<br>잠시 후 다시 시도해주세요.';
+    return;
+  }
+
+  const auth = getStoredAuth();
+  if (!auth) {
+    showAuthModal();
+  } else {
+    renderBus();
+    renderRoom();
+  }
+})();
+</script>
+</body>
+</html>
