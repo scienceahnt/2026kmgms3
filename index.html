@@ -1028,9 +1028,8 @@
   <div class="content hidden" id="panel-class">
     <div id="class-content">
       <div style="padding:20px;background:#FFF8E6;color:#66501C;border-radius:8px;font-size:13px;text-align:center;">
-        <div style="font-size:30px;margin-bottom:8px;">⏳</div>
-        <strong>반별 명단 로딩 중...</strong><br>
-        <small style="opacity:0.7;">잠시만 기다려주세요. 만약 이 화면이 계속 보이면 새로고침해주세요.</small>
+        <div style="font-size:28px;margin-bottom:8px;">⏳</div>
+        <strong>데이터 로딩 중...</strong>
       </div>
     </div>
   </div>
@@ -1087,6 +1086,8 @@ const LIVE_END = new Date("2026-05-27T21:00:00+09:00");
 
 // ============ 교사용 인증 해시 (SHA-256: "반-뒷4자리") ============
 const TEACHER_HASHES = [
+  "1-3c0392ea471258e6d23ce15b2bddedbf7cc8c0694a4d5ff550f8067080901cb8",
+  "1-fe0d4feb1d7ceb392175422719f5a371424fc87f05d54efe626df8ed3e9fcbd4",
   "1-20c4ab40a56299adf5f615fea3e7a06f9575472aa8af3c8a8b3bc975b61f2d1d",
   "1-1a5f2281e805936d7cad4b4a335ce6cd5ca89fff78dfe3ea8225b118ce19cb8f",
   "2-64cfe0fcf97fa684d134b1bffa97d02acb7c57fb6a831a2fae07a7486273344e",
@@ -1697,134 +1698,81 @@ function isTeacher() {
   return auth && auth.teacher;
 }
 
-// 반별 뷰 렌더링
+// 반별 뷰 렌더링 (v3 - 완전 재작성)
 function renderClassView() {
+  console.log('[ClassView] 호출됨');
   const container = document.getElementById('class-content');
   if (!container) {
-    console.error('class-content 요소를 찾을 수 없습니다');
+    console.error('[ClassView] class-content 요소가 없습니다');
     return;
   }
 
-  try {
-    // 데이터 확인
-    if (!DATA.master || DATA.master.length === 0) {
-      container.innerHTML = '<div style="padding:20px;background:#FFF8E6;color:#66501C;border-radius:8px;font-size:12px;">⚠️ 학생 데이터가 아직 로드되지 않았습니다.<br>잠시 후 다시 시도해주세요.</div>';
-      return;
-    }
-
-    let html = '';
-
-    // 검색창
-    html += `
-      <div class="search-section">
-        <input type="text" id="search-input" class="search-input" placeholder="🔍 학생 이름·반-번호로 검색 (예: 강다윤, 1-5)">
-        <div id="search-results" class="search-results"></div>
-      </div>
-    `;
-
-    // 반별 색상 테마
-    const themes = {
-      '1': { bg: '#FBEAF0', border: '#D4537E', title: '#4B1528', sub: '#993556' },
-      '2': { bg: '#EEEDFE', border: '#7F77DD', title: '#26215C', sub: '#534AB7' },
-      '3': { bg: '#E1F5EE', border: '#1D9E75', title: '#085041', sub: '#0F6E56' },
-      '4': { bg: '#E6F1FB', border: '#378ADD', title: '#042C53', sub: '#185FA5' }
-    };
-
-    // 전체 반 동시 표시
-    ['1', '2', '3', '4'].forEach(cls => {
-      const t = themes[cls];
-      const students = DATA.master
-        .filter(s => getCls(s) === cls)
-        .sort((a, b) => parseInt(getNum(a)) - parseInt(getNum(b)));
-      const joined = students.filter(s => getJoin(s) === 'O');
-      const notJoined = students.filter(s => getJoin(s) !== 'O');
-      const homeroom = HOMEROOM_TEACHERS[cls] || '';
-
-      html += `
-        <div style="margin-bottom: 14px; border: 1px solid #e5e5e0; border-radius: 10px; overflow: hidden;">
-          <div style="padding: 12px 14px; background: ${t.bg}; border-bottom: 1px solid #e5e5e0; display: flex; justify-content: space-between; align-items: center;">
-            <div>
-              <div style="font-size: 14px; font-weight: 700; color: ${t.title};">3학년 ${cls}반</div>
-              <div style="font-size: 11px; color: ${t.sub}; margin-top: 2px;">
-                <i class="ti ti-user-star" style="font-size:11px;"></i> 담임: ${homeroom}
-              </div>
-            </div>
-            <div style="font-size: 11px; background: #fff; padding: 4px 10px; border-radius: 11px; color: ${t.sub}; font-weight: 600;">
-              참가 ${joined.length} · 미참가 ${notJoined.length}
-            </div>
-          </div>
-          <div style="padding: 10px; background: #fff;">
-            <div style="display: flex; flex-direction: column; gap: 5px;">
-              ${students.map(s => {
-                const join = getJoin(s) === 'O';
-                const leader = isLeader(s);
-                return `
-                  <div style="display:flex; align-items:center; gap:8px; padding:7px 10px; background:${join ? '#fff' : '#f4f4f1'}; border:0.5px solid #e5e5e0; border-radius:6px; ${!join ? 'opacity:0.5;' : ''}">
-                    <span style="min-width:26px; background:#f4f4f1; padding:3px 0; border-radius:4px; font-size:11px; font-weight:600; text-align:center; color:#5f5e5a;">${String(getNum(s)).padStart(2,'0')}</span>
-                    <span style="font-size:12px; font-weight:600; flex:1;">
-                      ${getName(s)}
-                      ${leader ? '<span class="badge-inline" style="background:#D4537E;">방장</span>' : ''}
-                      ${!join ? '<span class="badge-inline" style="background:#888780;">미참가</span>' : ''}
-                    </span>
-                    ${join ? `<span style="font-size:10px; color:#5f5e5a; text-align:right;">
-                      ${getBus(s) || '-'}<br>${getRoom(s) || '-'}
-                    </span>` : ''}
-                  </div>
-                `;
-              }).join('')}
-            </div>
-          </div>
-        </div>
-      `;
-    });
-
-    container.innerHTML = html;
-
-    // 검색 기능
-    const searchInput = document.getElementById('search-input');
-    searchInput.addEventListener('input', () => {
-      const q = searchInput.value.trim().toLowerCase();
-      const resultsEl = document.getElementById('search-results');
-      if (!q) { resultsEl.innerHTML = ''; return; }
-
-      const matches = DATA.master.filter(s => {
-        if (getJoin(s) !== 'O') return false;
-        const name = getName(s).replace(/\s/g, '').toLowerCase();
-        const clsNum = getCls(s) + '-' + getNum(s);
-        const clsNum2 = getCls(s) + '-' + String(getNum(s)).padStart(2, '0');
-        return name.includes(q) || clsNum === q || clsNum2 === q;
-      });
-
-      if (matches.length === 0) {
-        resultsEl.innerHTML = '<div class="empty">검색 결과가 없습니다</div>';
-        return;
-      }
-
-      resultsEl.innerHTML = matches.map(s => `
-        <div class="result-card">
-          <div class="result-name">
-            <i class="ti ti-user-circle" style="color:#1D9E75;"></i>
-            ${getName(s)}
-            <span style="font-size:11px;color:#888780;font-weight:400;margin-left:6px;">3-${getCls(s)} / ${getNum(s)}번</span>
-            ${isLeader(s) ? '<span class="badge-inline" style="background:#D4537E;">방장</span>' : ''}
-          </div>
-          <div class="result-info">
-            <div class="item">
-              <div class="label"><i class="ti ti-bus"></i> 호차</div>
-              <div class="value">${getBus(s) || '-'}</div>
-            </div>
-            <div class="item">
-              <div class="label"><i class="ti ti-bed"></i> 숙소</div>
-              <div class="value">${getRoom(s) || '-'}</div>
-            </div>
-          </div>
-        </div>
-      `).join('');
-    });
-  } catch (e) {
-    console.error('renderClassView 에러:', e);
-    container.innerHTML = '<div style="padding:20px;background:#FCEBEB;color:#A32D2D;border-radius:8px;font-size:12px;"><strong>반별 화면 에러:</strong><br>' + e.message + '<br><br><pre style="font-size:10px;white-space:pre-wrap;">' + (e.stack || '') + '</pre></div>';
+  // 데이터 확인
+  if (!DATA.master || DATA.master.length === 0) {
+    container.innerHTML = '<div style="padding:20px;background:#FFF8E6;color:#66501C;border-radius:8px;font-size:13px;text-align:center;">⏳ 학생 데이터를 불러오는 중입니다...<br><small>잠시만 기다려주세요</small></div>';
+    return;
   }
+
+  console.log('[ClassView] 학생 수:', DATA.master.length);
+
+  const themes = {
+    '1': { bg: '#FBEAF0', title: '#4B1528', sub: '#993556' },
+    '2': { bg: '#EEEDFE', title: '#26215C', sub: '#534AB7' },
+    '3': { bg: '#E1F5EE', title: '#085041', sub: '#0F6E56' },
+    '4': { bg: '#E6F1FB', title: '#042C53', sub: '#185FA5' }
+  };
+
+  let html = '<div style="padding-bottom:8px;">';
+
+  ['1', '2', '3', '4'].forEach(cls => {
+    const t = themes[cls];
+    const students = DATA.master
+      .filter(s => String(getCls(s)) === cls)
+      .sort((a, b) => parseInt(getNum(a) || 0) - parseInt(getNum(b) || 0));
+    const joined = students.filter(s => getJoin(s) === 'O');
+    const notJoined = students.filter(s => getJoin(s) !== 'O');
+    const homeroom = HOMEROOM_TEACHERS[cls] || '';
+
+    html += '<div style="margin-bottom:14px;border:1px solid #e5e5e0;border-radius:10px;overflow:hidden;">';
+
+    // 헤더
+    html += '<div style="padding:12px 14px;background:' + t.bg + ';display:flex;justify-content:space-between;align-items:center;">';
+    html += '<div>';
+    html += '<div style="font-size:14px;font-weight:700;color:' + t.title + ';">3학년 ' + cls + '반</div>';
+    html += '<div style="font-size:11px;color:' + t.sub + ';margin-top:2px;">담임: ' + homeroom + '</div>';
+    html += '</div>';
+    html += '<div style="font-size:11px;background:#fff;padding:4px 10px;border-radius:11px;color:' + t.sub + ';font-weight:600;">참가 ' + joined.length + ' · 미참가 ' + notJoined.length + '</div>';
+    html += '</div>';
+
+    // 학생 명단
+    html += '<div style="padding:10px;background:#fff;">';
+    if (students.length === 0) {
+      html += '<div style="text-align:center;color:#888780;font-size:12px;padding:8px;">학생 데이터가 없습니다</div>';
+    } else {
+      students.forEach(s => {
+        const join = getJoin(s) === 'O';
+        const num = String(getNum(s) || '').padStart(2, '0');
+        const name = getName(s) || '-';
+        const bus = getBus(s) || '-';
+        const room = getRoom(s) || '-';
+
+        html += '<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:' + (join ? '#fff' : '#f4f4f1') + ';border:0.5px solid #e5e5e0;border-radius:6px;margin-bottom:4px;' + (!join ? 'opacity:0.5;' : '') + '">';
+        html += '<span style="min-width:28px;background:#f4f4f1;padding:3px 0;border-radius:4px;font-size:11px;font-weight:600;text-align:center;color:#5f5e5a;">' + num + '</span>';
+        html += '<span style="font-size:12px;font-weight:600;flex:1;">' + name + (join ? '' : ' <span style="font-size:9px;color:#888780;">(미참가)</span>') + '</span>';
+        if (join) {
+          html += '<span style="font-size:10px;color:#5f5e5a;text-align:right;line-height:1.4;">' + bus + '<br>' + room + '</span>';
+        }
+        html += '</div>';
+      });
+    }
+    html += '</div>';
+    html += '</div>';
+  });
+
+  html += '</div>';
+
+  container.innerHTML = html;
+  console.log('[ClassView] 렌더링 완료');
 }
 
 // ============ 줌 링크 적용 ============
@@ -1883,23 +1831,6 @@ function updateLiveStatus() {
   setInterval(updateLiveStatus, 30000);
 
   const ok = await loadData();
-
-  // 디버그: 데이터 로딩 상태 확인 (반별 탭에 표시)
-  const classContent = document.getElementById('class-content');
-  if (classContent) {
-    classContent.innerHTML = `
-      <div style="padding:14px;background:#E6F1FB;color:#042C53;border-radius:8px;font-size:11px;margin-bottom:10px;font-family:monospace;">
-        <strong>디버그 정보 (v3)</strong><br>
-        데이터 로딩: ${ok ? '✅ 성공' : '❌ 실패'}<br>
-        DATA.master 길이: ${DATA.master ? DATA.master.length : 'undefined'}<br>
-        DATA.master 샘플(첫번째): ${DATA.master && DATA.master[0] ? JSON.stringify(DATA.master[0]).substring(0, 200) : '없음'}<br>
-        getCls 테스트: ${DATA.master && DATA.master[0] ? '"' + getCls(DATA.master[0]) + '"' : '없음'}<br>
-        getNum 테스트: ${DATA.master && DATA.master[0] ? '"' + getNum(DATA.master[0]) + '"' : '없음'}<br>
-        getName 테스트: ${DATA.master && DATA.master[0] ? '"' + getName(DATA.master[0]) + '"' : '없음'}
-      </div>
-    `;
-  }
-
   if (!ok) {
     document.getElementById('bus-loading').innerHTML = '데이터를 불러올 수 없습니다.<br>잠시 후 다시 시도해주세요.';
     document.getElementById('room-loading').innerHTML = '데이터를 불러올 수 없습니다.<br>잠시 후 다시 시도해주세요.';
