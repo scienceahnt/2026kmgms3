@@ -1536,25 +1536,33 @@ function logout() {
 
 // ============ 교사 모드 ============
 function enterTeacherMode() {
-  // 헤더 색상 변경 + 배지 표시
-  const header = document.querySelector('.header');
-  header.style.background = 'linear-gradient(135deg, #4A1B0C 0%, #993C1D 100%)';
-  if (!document.getElementById('teacher-badge')) {
-    const badge = document.createElement('div');
-    badge.id = 'teacher-badge';
-    badge.style.cssText = 'position:absolute;top:14px;right:14px;background:#fff;color:#993C1D;padding:3px 9px;border-radius:11px;font-size:10px;font-weight:700;letter-spacing:0.5px;';
-    badge.innerHTML = '<i class="ti ti-shield-check" style="font-size:11px;vertical-align:-1px;"></i> 교사';
-    header.appendChild(badge);
+  try {
+    // 헤더 색상 변경 + 배지 표시
+    const header = document.querySelector('.header');
+    header.style.background = 'linear-gradient(135deg, #4A1B0C 0%, #993C1D 100%)';
+    if (!document.getElementById('teacher-badge')) {
+      const badge = document.createElement('div');
+      badge.id = 'teacher-badge';
+      badge.style.cssText = 'position:absolute;top:14px;right:14px;background:#fff;color:#993C1D;padding:3px 9px;border-radius:11px;font-size:10px;font-weight:700;letter-spacing:0.5px;';
+      badge.innerHTML = '<i class="ti ti-shield-check" style="font-size:11px;vertical-align:-1px;"></i> 교사';
+      header.appendChild(badge);
+    }
+
+    // 메인 탭에 반별 추가
+    document.getElementById('main-tabs').classList.add('teacher-mode');
+    document.getElementById('class-tab-btn').classList.remove('hidden');
+
+    // 기본 렌더링
+    renderBus();
+    renderRoom();
+    renderClassView();
+  } catch (e) {
+    console.error('교사 모드 에러:', e);
+    const container = document.getElementById('class-content');
+    if (container) {
+      container.innerHTML = '<div style="padding:20px;background:#FCEBEB;color:#A32D2D;border-radius:8px;font-size:12px;"><strong>에러 발생:</strong><br>' + e.message + '<br><br><pre style="font-size:10px;white-space:pre-wrap;">' + (e.stack || '') + '</pre></div>';
+    }
   }
-
-  // 메인 탭에 반별 추가
-  document.getElementById('main-tabs').classList.add('teacher-mode');
-  document.getElementById('class-tab-btn').classList.remove('hidden');
-
-  // 기본 렌더링
-  renderBus();
-  renderRoom();
-  renderClassView();
 }
 
 function exitTeacherMode() {
@@ -1575,7 +1583,19 @@ function isTeacher() {
 // 반별 뷰 렌더링
 function renderClassView() {
   const container = document.getElementById('class-content');
-  let html = '';
+  if (!container) {
+    console.error('class-content 요소를 찾을 수 없습니다');
+    return;
+  }
+
+  try {
+    let html = '';
+
+    // 데이터 확인
+    if (!DATA.master || DATA.master.length === 0) {
+      container.innerHTML = '<div style="padding:20px;background:#FFF8E6;color:#66501C;border-radius:8px;font-size:12px;">⚠️ 학생 데이터가 아직 로드되지 않았습니다.<br>잠시 후 다시 시도해주세요.</div>';
+      return;
+    }
 
   // 검색창
   html += `
@@ -1658,6 +1678,10 @@ function renderClassView() {
   });
 
   renderClassList('1');
+  } catch (e) {
+    console.error('renderClassView 에러:', e);
+    container.innerHTML = '<div style="padding:20px;background:#FCEBEB;color:#A32D2D;border-radius:8px;font-size:12px;"><strong>반별 화면 에러:</strong><br>' + e.message + '<br><br><pre style="font-size:10px;white-space:pre-wrap;">' + (e.stack || '') + '</pre></div>';
+  }
 }
 
 function renderClassList(cls) {
