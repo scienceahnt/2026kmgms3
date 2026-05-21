@@ -1659,11 +1659,15 @@ function isTeacher() {
 
 // 반별 뷰 렌더링
 function renderClassView() {
+  console.log('[v2] renderClassView 호출됨');
   const container = document.getElementById('class-content');
   if (!container) {
     console.error('class-content 요소를 찾을 수 없습니다');
     return;
   }
+
+  // 임시 디버그: 호출되었다는 표시
+  container.innerHTML = '<div style="padding:14px; background:#E1F5EE; color:#0F6E56; border-radius:8px; font-size:12px; margin-bottom:10px;">✅ [v2] 새 파일 적용 확인됨. 데이터 로딩 중...</div>';
 
   try {
     // 데이터 확인
