@@ -56,6 +56,9 @@
     top: 71px;
     z-index: 40;
   }
+  .tabs.teacher-mode {
+    grid-template-columns: repeat(5, 1fr);
+  }
   .tab {
     padding: 12px 4px 10px;
     border: none;
@@ -174,6 +177,26 @@
   .schedule-item.amber .schedule-title { color: #412402; }
   .schedule-item.amber .schedule-sub { color: #854F0B; }
   .schedule-item.dim { opacity: 0.7; }
+  /* 메뉴 박스 */
+  .menu-box {
+    margin-top: 7px;
+    padding: 7px 10px;
+    background: rgba(255, 255, 255, 0.6);
+    border-radius: 6px;
+    border: 1px dashed #d3d1c7;
+  }
+  .menu-label {
+    font-size: 9px;
+    color: #888780;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    margin-bottom: 3px;
+  }
+  .menu-items {
+    font-size: 11px;
+    color: #5f5e5a;
+    line-height: 1.6;
+  }
   .badge-inline {
     display: inline-block;
     padding: 1px 6px;
@@ -646,11 +669,12 @@
   </div>
 
   <!-- 메인 탭 -->
-  <div class="tabs">
+  <div class="tabs" id="main-tabs">
     <button class="tab active" data-tab="schedule"><i class="ti ti-calendar-event"></i>일정</button>
     <button class="tab" data-tab="bus"><i class="ti ti-bus"></i>호차</button>
     <button class="tab" data-tab="room"><i class="ti ti-bed"></i>숙소</button>
     <button class="tab" data-tab="live"><i class="ti ti-broadcast"></i>라이브</button>
+    <button class="tab hidden" data-tab="class" id="class-tab-btn"><i class="ti ti-users-group"></i>반별</button>
   </div>
 
   <!-- 컨텐츠: 일정표 -->
@@ -712,6 +736,10 @@
         <div class="schedule-body">
           <div class="schedule-title">저녁 식사 및 휴식</div>
           <div class="schedule-sub"><i class="ti ti-map-pin"></i>구내식당</div>
+          <div class="menu-box">
+            <div class="menu-label">오늘의 메뉴</div>
+            <div class="menu-items">닭장각바베큐구이 · 치즈오븐스파게티 · 양배추샐러드&키위D · 치킨무 · 흰밥 · 우동장국 · 무맛김치</div>
+          </div>
         </div>
       </div>
 
@@ -774,6 +802,10 @@
         <div class="schedule-body">
           <div class="schedule-title">아침 식사</div>
           <div class="schedule-sub"><i class="ti ti-map-pin"></i>구내식당</div>
+          <div class="menu-box">
+            <div class="menu-label">오늘의 메뉴</div>
+            <div class="menu-items">소고기무국 · 두부조림 · 비엔나소시지볶음 · 콩나물무침 · 잡곡밥 · 포기김치 · 딸기요거트</div>
+          </div>
         </div>
       </div>
 
@@ -797,7 +829,11 @@
         <div class="schedule-time">11:50<span class="end">~13:00</span></div>
         <div class="schedule-body">
           <div class="schedule-title">점심 식사</div>
-          <div class="schedule-sub"><i class="ti ti-map-pin"></i>에코리움</div>
+          <div class="schedule-sub"><i class="ti ti-map-pin"></i>에코리움 식당</div>
+          <div class="menu-box">
+            <div class="menu-label">오늘의 메뉴</div>
+            <div class="menu-items">돈가스</div>
+          </div>
         </div>
       </div>
 
@@ -822,6 +858,10 @@
         <div class="schedule-body">
           <div class="schedule-title">저녁 식사</div>
           <div class="schedule-sub"><i class="ti ti-map-pin"></i>구내식당</div>
+          <div class="menu-box">
+            <div class="menu-label">오늘의 메뉴</div>
+            <div class="menu-items">돈코츠라멘 · 오꼬노미오징어까스 · 락교단무지무침 · 흰밥 · 포기김치 · 식물성요구르트</div>
+          </div>
         </div>
       </div>
 
@@ -880,6 +920,10 @@
         <div class="schedule-body">
           <div class="schedule-title">아침 식사</div>
           <div class="schedule-sub"><i class="ti ti-map-pin"></i>구내식당</div>
+          <div class="menu-box">
+            <div class="menu-label">오늘의 메뉴</div>
+            <div class="menu-items">떡갈비야채볶음 · 닭살미역국 · 볼어묵조림 · 잡곡밥 · 포기김치 · 시리얼&우유</div>
+          </div>
         </div>
       </div>
 
@@ -968,6 +1012,9 @@
         · 자녀 응원 메시지는 채팅으로 보내주세요
       </div>
     </div>
+  <!-- 컨텐츠: 반별 (교사 전용) -->
+  <div class="content hidden" id="panel-class">
+    <div id="class-content"></div>
   </div>
 
 </div>
@@ -992,7 +1039,7 @@
       </div>
       <div class="form-field">
         <label>번호</label>
-        <input type="number" id="auth-number" placeholder="번호" min="1" max="30" inputmode="numeric">
+        <input type="text" id="auth-number" placeholder="번호" maxlength="4" inputmode="numeric" autocomplete="off">
       </div>
     </div>
 
@@ -1019,6 +1066,21 @@ const SHEET_URLS = {
 const ZOOM_LINK = "https://us06web.zoom.us/launch/jc/83750549462";
 const LIVE_START = new Date("2026-05-27T19:30:00+09:00");
 const LIVE_END = new Date("2026-05-27T21:00:00+09:00");
+
+// ============ 교사용 인증 해시 (SHA-256: "반-뒷4자리") ============
+const TEACHER_HASHES = [
+  "1-20c4ab40a56299adf5f615fea3e7a06f9575472aa8af3c8a8b3bc975b61f2d1d",
+  "1-1a5f2281e805936d7cad4b4a335ce6cd5ca89fff78dfe3ea8225b118ce19cb8f",
+  "2-64cfe0fcf97fa684d134b1bffa97d02acb7c57fb6a831a2fae07a7486273344e",
+  "3-a877066ef9984fbcc8f51e966f0415ed78327cb71923af0e07987869767c6e1f",
+  "3-20ed3577aec8a7415ab180278206203a4c5e608338a7e800f6acb24dd891bca3",
+  "4-dd3c3d8b51ed24018f5ce6d18ca2daf876b055ef4db9b40dc8d386675e2f502e"
+];
+
+async function sha256(text) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
 
 // ============ CSV 파서 ============
 function parseCSV(text) {
@@ -1126,8 +1188,9 @@ document.querySelectorAll('.tab').forEach(btn => {
   btn.addEventListener('click', () => {
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
     btn.classList.add('active');
-    ['schedule', 'bus', 'room', 'live'].forEach(name => {
-      document.getElementById('panel-' + name).classList.add('hidden');
+    ['schedule', 'bus', 'room', 'live', 'class'].forEach(name => {
+      const el = document.getElementById('panel-' + name);
+      if (el) el.classList.add('hidden');
     });
     document.getElementById('panel-' + btn.dataset.tab).classList.remove('hidden');
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1167,7 +1230,7 @@ function hideAuthModal() {
   document.getElementById('auth-modal').classList.add('hidden');
 }
 
-document.getElementById('auth-submit').addEventListener('click', () => {
+document.getElementById('auth-submit').addEventListener('click', async () => {
   const cls = document.getElementById('auth-class').value;
   const num = document.getElementById('auth-number').value;
   const errEl = document.getElementById('auth-error');
@@ -1178,6 +1241,19 @@ document.getElementById('auth-submit').addEventListener('click', () => {
     return;
   }
 
+  // 교사 인증 시도: 4자리 숫자면 해시 비교
+  if (/^\d{4}$/.test(num)) {
+    const hash = cls + '-' + (await sha256(cls + '-' + num));
+    if (TEACHER_HASHES.includes(hash)) {
+      setStoredAuth({ teacher: true });
+      errEl.classList.add('hidden');
+      hideAuthModal();
+      enterTeacherMode();
+      return;
+    }
+  }
+
+  // 학생 인증
   const student = DATA.master.find(s =>
     getCls(s) === cls && getNum(s) === String(parseInt(num, 10))
   );
@@ -1216,8 +1292,20 @@ function renderBus() {
   const auth = getStoredAuth();
   let html = '';
 
-  // 내 정보 카드
-  if (auth && !auth.skip) {
+  // 교사 모드: 안내 + 로그아웃
+  if (auth && auth.teacher) {
+    html += `
+      <div class="my-info" style="background:linear-gradient(135deg,#FAECE7 0%,#fff 100%);border-color:#D85A30;">
+        <div class="header-row">
+          <div>
+            <div class="label" style="color:#993C1D;"><i class="ti ti-shield-check"></i> 교사 모드</div>
+            <div class="badge" style="color:#4A1B0C;font-size:13px;">전체 정보 열람 가능</div>
+          </div>
+          <button class="reset-btn" onclick="logout()">로그아웃</button>
+        </div>
+      </div>
+    `;
+  } else if (auth && !auth.skip) {
     const me = DATA.master.find(s => getCls(s) === auth.cls && getNum(s) === auth.num);
     if (me) {
       html += `
@@ -1285,8 +1373,9 @@ function renderBus() {
           <div class="member-grid">
             ${members.map(s => {
               const auth = getStoredAuth();
-              const isMe = auth && !auth.skip && getCls(s) === auth.cls && getNum(s) === auth.num;
-              const displayName = maskName(getName(s));
+              const isMe = auth && !auth.skip && !auth.teacher && getCls(s) === auth.cls && getNum(s) === auth.num;
+              const teacher = isTeacher();
+              const displayName = teacher ? getName(s) : maskName(getName(s));
               return `<div class="member-chip" ${isMe ? 'style="background:#FAEEDA;color:#854F0B;font-weight:600;"' : ''}>
                 <div style="font-size:11px;font-weight:600;">${displayName}</div>
                 <div style="font-size:9px;color:#888780;margin-top:1px;">${getCls(s)}-${String(getNum(s)).padStart(2,'0')}</div>
@@ -1318,8 +1407,8 @@ function renderRoom() {
 
   // 내 정보가 있으면 해당 동으로 자동 이동
   const auth = getStoredAuth();
-  let initBld = '2';
-  if (auth && !auth.skip) {
+  let initBld = '1';
+  if (auth && !auth.skip && !auth.teacher) {
     const me = DATA.master.find(s => getCls(s) === auth.cls && getNum(s) === auth.num);
     if (me) {
       const m = getRoom(me).match(/(\d)동/);
@@ -1338,7 +1427,19 @@ function renderRoomList(bld) {
 
   // 내 정보 카드 (방 기준)
   let html = '';
-  if (auth && !auth.skip) {
+  if (auth && auth.teacher) {
+    html += `
+      <div class="my-info" style="background:linear-gradient(135deg,#FAECE7 0%,#fff 100%);border-color:#D85A30;">
+        <div class="header-row">
+          <div>
+            <div class="label" style="color:#993C1D;"><i class="ti ti-shield-check"></i> 교사 모드</div>
+            <div class="badge" style="color:#4A1B0C;font-size:13px;">${bld}동 객실 명단</div>
+          </div>
+          <button class="reset-btn" onclick="logout()">로그아웃</button>
+        </div>
+      </div>
+    `;
+  } else if (auth && !auth.skip) {
     const me = DATA.master.find(s => getCls(s) === auth.cls && getNum(s) === auth.num);
     if (me && getRoom(me)) {
       html += `
@@ -1404,8 +1505,9 @@ function renderRoomList(bld) {
           <div class="member-grid">
             ${members.map(s => {
               const leader = isLeader(s);
-              const isMe = auth && !auth.skip && getCls(s) === auth.cls && getNum(s) === auth.num;
-              const displayName = maskName(getName(s));
+              const isMe = auth && !auth.skip && !auth.teacher && getCls(s) === auth.cls && getNum(s) === auth.num;
+              const teacher = isTeacher();
+              const displayName = teacher ? getName(s) : maskName(getName(s));
               let style = '';
               if (isMe) style = 'background:#FAEEDA;color:#854F0B;font-weight:600;';
               return `<div class="member-chip ${leader ? 'leader' : ''}" ${style ? `style="${style}"` : ''}>
@@ -1427,7 +1529,186 @@ function logout() {
   clearStoredAuth();
   document.getElementById('auth-class').value = '';
   document.getElementById('auth-number').value = '';
+  // 교사 모드 UI 해제
+  exitTeacherMode();
   showAuthModal();
+}
+
+// ============ 교사 모드 ============
+function enterTeacherMode() {
+  // 헤더 색상 변경 + 배지 표시
+  const header = document.querySelector('.header');
+  header.style.background = 'linear-gradient(135deg, #4A1B0C 0%, #993C1D 100%)';
+  if (!document.getElementById('teacher-badge')) {
+    const badge = document.createElement('div');
+    badge.id = 'teacher-badge';
+    badge.style.cssText = 'position:absolute;top:14px;right:14px;background:#fff;color:#993C1D;padding:3px 9px;border-radius:11px;font-size:10px;font-weight:700;letter-spacing:0.5px;';
+    badge.innerHTML = '<i class="ti ti-shield-check" style="font-size:11px;vertical-align:-1px;"></i> 교사';
+    header.appendChild(badge);
+  }
+
+  // 메인 탭에 반별 추가
+  document.getElementById('main-tabs').classList.add('teacher-mode');
+  document.getElementById('class-tab-btn').classList.remove('hidden');
+
+  // 기본 렌더링
+  renderBus();
+  renderRoom();
+  renderClassView();
+}
+
+function exitTeacherMode() {
+  const header = document.querySelector('.header');
+  header.style.background = '';
+  const badge = document.getElementById('teacher-badge');
+  if (badge) badge.remove();
+  document.getElementById('main-tabs').classList.remove('teacher-mode');
+  document.getElementById('class-tab-btn').classList.add('hidden');
+}
+
+// 교사 모드인지 확인
+function isTeacher() {
+  const auth = getStoredAuth();
+  return auth && auth.teacher;
+}
+
+// 반별 뷰 렌더링
+function renderClassView() {
+  const container = document.getElementById('class-content');
+  let html = '';
+
+  // 검색창
+  html += `
+    <div class="search-section">
+      <input type="text" id="search-input" class="search-input" placeholder="학생 이름·반·번호로 검색 (예: 강다윤, 1-5)">
+      <div id="search-results" class="search-results"></div>
+    </div>
+  `;
+
+  // 반별 그룹
+  const classGroups = { '1': [], '2': [], '3': [], '4': [] };
+  DATA.master.forEach(s => {
+    const cls = getCls(s);
+    if (classGroups[cls]) classGroups[cls].push(s);
+  });
+
+  // 반 선택 탭
+  html += `
+    <div class="day-tabs" id="class-tabs">
+      <button class="day-tab active" data-cls="1">1반</button>
+      <button class="day-tab" data-cls="2">2반</button>
+      <button class="day-tab" data-cls="3">3반</button>
+      <button class="day-tab" data-cls="4">4반</button>
+    </div>
+    <div id="class-list"></div>
+  `;
+
+  container.innerHTML = html;
+
+  // 탭 클릭
+  container.querySelectorAll('#class-tabs .day-tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      container.querySelectorAll('#class-tabs .day-tab').forEach(t => t.classList.remove('active'));
+      btn.classList.add('active');
+      renderClassList(btn.dataset.cls);
+    });
+  });
+
+  // 검색
+  const searchInput = document.getElementById('search-input');
+  searchInput.addEventListener('input', () => {
+    const q = searchInput.value.trim().toLowerCase();
+    const resultsEl = document.getElementById('search-results');
+    if (!q) { resultsEl.innerHTML = ''; return; }
+
+    // 검색: 이름 부분일치, 반-번호 패턴(예: "1-5") 매칭
+    const matches = DATA.master.filter(s => {
+      if (getJoin(s) !== 'O') return false;
+      const name = getName(s).replace(/\s/g, '').toLowerCase();
+      const clsNum = getCls(s) + '-' + getNum(s);
+      const clsNum2 = getCls(s) + '-' + String(getNum(s)).padStart(2, '0');
+      return name.includes(q) || clsNum === q || clsNum2 === q;
+    });
+
+    if (matches.length === 0) {
+      resultsEl.innerHTML = '<div class="empty">검색 결과가 없습니다</div>';
+      return;
+    }
+
+    resultsEl.innerHTML = matches.map(s => `
+      <div class="result-card">
+        <div class="result-name">
+          <i class="ti ti-user-circle" style="color:#1D9E75;"></i>
+          ${getName(s)}
+          <span style="font-size:11px;color:#888780;font-weight:400;margin-left:6px;">3-${getCls(s)} / ${getNum(s)}번</span>
+          ${isLeader(s) ? '<span class="badge-inline" style="background:#D4537E;">방장</span>' : ''}
+        </div>
+        <div class="result-info">
+          <div class="item">
+            <div class="label"><i class="ti ti-bus"></i> 호차</div>
+            <div class="value">${getBus(s) || '-'}</div>
+          </div>
+          <div class="item">
+            <div class="label"><i class="ti ti-bed"></i> 숙소</div>
+            <div class="value">${getRoom(s) || '-'}</div>
+          </div>
+        </div>
+      </div>
+    `).join('');
+  });
+
+  renderClassList('1');
+}
+
+function renderClassList(cls) {
+  const listEl = document.getElementById('class-list');
+  const students = DATA.master
+    .filter(s => getCls(s) === cls)
+    .sort((a, b) => parseInt(getNum(a)) - parseInt(getNum(b)));
+
+  if (students.length === 0) {
+    listEl.innerHTML = '<div class="empty">해당 반 학생이 없습니다</div>';
+    return;
+  }
+
+  const joined = students.filter(s => getJoin(s) === 'O');
+  const notJoined = students.filter(s => getJoin(s) !== 'O');
+
+  let html = `
+    <div style="display:flex;gap:10px;margin-bottom:12px;font-size:11px;">
+      <div style="flex:1;background:#E1F5EE;color:#0F6E56;padding:8px 12px;border-radius:7px;text-align:center;">
+        참가 <strong style="font-size:14px;">${joined.length}</strong>명
+      </div>
+      <div style="flex:1;background:#f4f4f1;color:#5f5e5a;padding:8px 12px;border-radius:7px;text-align:center;">
+        미참가 <strong style="font-size:14px;">${notJoined.length}</strong>명
+      </div>
+    </div>
+  `;
+
+  html += `<div style="display:flex;flex-direction:column;gap:6px;">`;
+  students.forEach(s => {
+    const join = getJoin(s) === 'O';
+    const leader = isLeader(s);
+    html += `
+      <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:${join ? '#fff' : '#f4f4f1'};border:1px solid #e5e5e0;border-radius:8px;${!join ? 'opacity:0.55;' : ''}">
+        <div style="min-width:36px;text-align:center;background:#f4f4f1;border-radius:6px;padding:4px 0;font-size:11px;font-weight:600;color:#5f5e5a;">${String(getNum(s)).padStart(2, '0')}</div>
+        <div style="flex:1;">
+          <div style="font-size:13px;font-weight:600;">
+            ${getName(s)}
+            ${leader ? '<span class="badge-inline" style="background:#D4537E;">방장</span>' : ''}
+            ${!join ? '<span class="badge-inline" style="background:#888780;">미참가</span>' : ''}
+          </div>
+          ${join ? `<div style="font-size:11px;color:#5f5e5a;margin-top:2px;">
+            <i class="ti ti-bus" style="font-size:11px;"></i> ${getBus(s) || '-'} ·
+            <i class="ti ti-bed" style="font-size:11px;"></i> ${getRoom(s) || '-'}
+          </div>` : ''}
+        </div>
+      </div>
+    `;
+  });
+  html += `</div>`;
+
+  listEl.innerHTML = html;
 }
 
 // ============ 줌 링크 적용 ============
@@ -1495,6 +1776,8 @@ function updateLiveStatus() {
   const auth = getStoredAuth();
   if (!auth) {
     showAuthModal();
+  } else if (auth.teacher) {
+    enterTeacherMode();
   } else {
     renderBus();
     renderRoom();
