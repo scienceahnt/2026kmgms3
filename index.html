@@ -4,6 +4,18 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>3학년 현장체험학습 안내</title>
+
+<!-- 카카오톡/소셜 공유 메타 태그 -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="2026 경민여중 3학년 체험학습">
+<meta property="og:description" content="일정표, 호차/숙소 안내, 장기자랑 라이브">
+<meta property="og:image" content="thumbnail.png">
+<meta property="og:image:width" content="800">
+<meta property="og:image:height" content="400">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="2026 경민여중 3학년 체험학습">
+<meta name="twitter:description" content="일정표, 호차/숙소 안내, 장기자랑 라이브">
+<meta name="twitter:image" content="thumbnail.png">
 <style>
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   body {
@@ -1014,7 +1026,13 @@
     </div>
   <!-- 컨텐츠: 반별 (교사 전용) -->
   <div class="content hidden" id="panel-class">
-    <div id="class-content"></div>
+    <div id="class-content">
+      <div style="padding:20px;background:#FFF8E6;color:#66501C;border-radius:8px;font-size:13px;text-align:center;">
+        <div style="font-size:30px;margin-bottom:8px;">⏳</div>
+        <strong>반별 명단 로딩 중...</strong><br>
+        <small style="opacity:0.7;">잠시만 기다려주세요. 만약 이 화면이 계속 보이면 새로고침해주세요.</small>
+      </div>
+    </div>
   </div>
 
 </div>
@@ -1865,6 +1883,23 @@ function updateLiveStatus() {
   setInterval(updateLiveStatus, 30000);
 
   const ok = await loadData();
+
+  // 디버그: 데이터 로딩 상태 확인 (반별 탭에 표시)
+  const classContent = document.getElementById('class-content');
+  if (classContent) {
+    classContent.innerHTML = `
+      <div style="padding:14px;background:#E6F1FB;color:#042C53;border-radius:8px;font-size:11px;margin-bottom:10px;font-family:monospace;">
+        <strong>디버그 정보 (v3)</strong><br>
+        데이터 로딩: ${ok ? '✅ 성공' : '❌ 실패'}<br>
+        DATA.master 길이: ${DATA.master ? DATA.master.length : 'undefined'}<br>
+        DATA.master 샘플(첫번째): ${DATA.master && DATA.master[0] ? JSON.stringify(DATA.master[0]).substring(0, 200) : '없음'}<br>
+        getCls 테스트: ${DATA.master && DATA.master[0] ? '"' + getCls(DATA.master[0]) + '"' : '없음'}<br>
+        getNum 테스트: ${DATA.master && DATA.master[0] ? '"' + getNum(DATA.master[0]) + '"' : '없음'}<br>
+        getName 테스트: ${DATA.master && DATA.master[0] ? '"' + getName(DATA.master[0]) + '"' : '없음'}
+      </div>
+    `;
+  }
+
   if (!ok) {
     document.getElementById('bus-loading').innerHTML = '데이터를 불러올 수 없습니다.<br>잠시 후 다시 시도해주세요.';
     document.getElementById('room-loading').innerHTML = '데이터를 불러올 수 없습니다.<br>잠시 후 다시 시도해주세요.';
