@@ -1077,6 +1077,22 @@ const TEACHER_HASHES = [
   "4-dd3c3d8b51ed24018f5ce6d18ca2daf876b055ef4db9b40dc8d386675e2f502e"
 ];
 
+// ============ 담임 정보 ============
+const HOMEROOM_TEACHERS = {
+  '1': '안성준',
+  '2': '조전식',
+  '3': '김혜진',
+  '4': '박효경'
+};
+
+// ============ 1동 교사 배정 (교사 전용) ============
+const TEACHER_ROOMS_1DONG = [
+  { room: '1동 201호', teachers: ['조전식', '김혜진'] },
+  { room: '1동 202호', teachers: ['박효경'] },
+  { room: '1동 203호', teachers: ['윤권영'] },
+  { room: '1동 204호', teachers: ['홍순화', '안성준'] }
+];
+
 async function sha256(text) {
   const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
   return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
@@ -1396,6 +1412,21 @@ function renderRoom() {
   document.getElementById('room-loading').classList.add('hidden');
   container.classList.remove('hidden');
 
+  const auth = getStoredAuth();
+
+  // 학생 모드에서는 1동 탭 숨기기 (교사 전용)
+  const bld1Tab = container.querySelector('.building-tab[data-bld="1"]');
+  const tabsEl = container.querySelector('.building-tabs');
+  if (bld1Tab && tabsEl) {
+    if (auth && auth.teacher) {
+      bld1Tab.style.display = '';
+      tabsEl.style.gridTemplateColumns = 'repeat(4, 1fr)';
+    } else {
+      bld1Tab.style.display = 'none';
+      tabsEl.style.gridTemplateColumns = 'repeat(3, 1fr)';
+    }
+  }
+
   // 동 탭 클릭
   container.querySelectorAll('.building-tab').forEach(btn => {
     btn.onclick = () => {
@@ -1406,9 +1437,10 @@ function renderRoom() {
   });
 
   // 내 정보가 있으면 해당 동으로 자동 이동
-  const auth = getStoredAuth();
-  let initBld = '1';
-  if (auth && !auth.skip && !auth.teacher) {
+  let initBld = '2'; // 학생 기본은 2동 (1동은 교사용)
+  if (auth && auth.teacher) {
+    initBld = '1'; // 교사는 1동 (교사 객실) 먼저
+  } else if (auth && !auth.skip && !auth.teacher) {
     const me = DATA.master.find(s => getCls(s) === auth.cls && getNum(s) === auth.num);
     if (me) {
       const m = getRoom(me).match(/(\d)동/);
@@ -1475,6 +1507,51 @@ function renderRoomList(bld) {
     if (!roomGroups[r]) roomGroups[r] = [];
     roomGroups[r].push(s);
   });
+
+  // 1동은 교사 전용 - 교사 모드일 때만 교사 명단 표시
+  if (bld === '1') {
+    if (auth && auth.teacher) {
+      html += `
+        <div style="padding:11px 14px; background:linear-gradient(135deg,#FAECE7 0%,#fff8f5 100%); border:1px solid #D85A30; border-radius:10px; margin-bottom:14px;">
+          <div style="display:flex; align-items:center; gap:6px; font-size:11px; font-weight:600; color:#993C1D; margin-bottom:4px;">
+            <i class="ti ti-shield-check"></i> 교사 전용 객실
+          </div>
+          <div style="font-size:10px; color:#5f5e5a; line-height:1.5;">1동은 교사 객실입니다. 학생 화면에서는 표시되지 않습니다.</div>
+        </div>
+      `;
+
+      TEACHER_ROOMS_1DONG.forEach(item => {
+        html += `
+          <div class="group-card">
+            <div class="group-header">
+              <div>
+                <div class="group-title"><i class="ti ti-bed"></i> ${item.room.replace('1동 ', '')}</div>
+              </div>
+              <div class="group-count">${item.teachers.length}명</div>
+            </div>
+            <div class="group-body">
+              <div class="member-grid">
+                ${item.teachers.map(t => `
+                  <div class="member-chip" style="background:#FAECE7; color:#4A1B0C; font-weight:600;">
+                    <div style="font-size:11px;">${t}</div>
+                    <div style="font-size:9px; color:#993C1D; margin-top:1px;">교사</div>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          </div>
+        `;
+      });
+
+      listEl.innerHTML = html;
+      return;
+    } else {
+      // 학생 모드에서 1동 클릭 - 사실상 학생용 1동 객실은 없음
+      html += `<div class="empty">1동에 배정된 방이 없습니다</div>`;
+      listEl.innerHTML = html;
+      return;
+    }
+  }
 
   const sortedRooms = Object.keys(roomGroups).sort();
 
@@ -1589,150 +1666,125 @@ function renderClassView() {
   }
 
   try {
-    let html = '';
-
     // 데이터 확인
     if (!DATA.master || DATA.master.length === 0) {
       container.innerHTML = '<div style="padding:20px;background:#FFF8E6;color:#66501C;border-radius:8px;font-size:12px;">⚠️ 학생 데이터가 아직 로드되지 않았습니다.<br>잠시 후 다시 시도해주세요.</div>';
       return;
     }
 
-  // 검색창
-  html += `
-    <div class="search-section">
-      <input type="text" id="search-input" class="search-input" placeholder="학생 이름·반·번호로 검색 (예: 강다윤, 1-5)">
-      <div id="search-results" class="search-results"></div>
-    </div>
-  `;
+    let html = '';
 
-  // 반별 그룹
-  const classGroups = { '1': [], '2': [], '3': [], '4': [] };
-  DATA.master.forEach(s => {
-    const cls = getCls(s);
-    if (classGroups[cls]) classGroups[cls].push(s);
-  });
-
-  // 반 선택 탭
-  html += `
-    <div class="day-tabs" id="class-tabs">
-      <button class="day-tab active" data-cls="1">1반</button>
-      <button class="day-tab" data-cls="2">2반</button>
-      <button class="day-tab" data-cls="3">3반</button>
-      <button class="day-tab" data-cls="4">4반</button>
-    </div>
-    <div id="class-list"></div>
-  `;
-
-  container.innerHTML = html;
-
-  // 탭 클릭
-  container.querySelectorAll('#class-tabs .day-tab').forEach(btn => {
-    btn.addEventListener('click', () => {
-      container.querySelectorAll('#class-tabs .day-tab').forEach(t => t.classList.remove('active'));
-      btn.classList.add('active');
-      renderClassList(btn.dataset.cls);
-    });
-  });
-
-  // 검색
-  const searchInput = document.getElementById('search-input');
-  searchInput.addEventListener('input', () => {
-    const q = searchInput.value.trim().toLowerCase();
-    const resultsEl = document.getElementById('search-results');
-    if (!q) { resultsEl.innerHTML = ''; return; }
-
-    // 검색: 이름 부분일치, 반-번호 패턴(예: "1-5") 매칭
-    const matches = DATA.master.filter(s => {
-      if (getJoin(s) !== 'O') return false;
-      const name = getName(s).replace(/\s/g, '').toLowerCase();
-      const clsNum = getCls(s) + '-' + getNum(s);
-      const clsNum2 = getCls(s) + '-' + String(getNum(s)).padStart(2, '0');
-      return name.includes(q) || clsNum === q || clsNum2 === q;
-    });
-
-    if (matches.length === 0) {
-      resultsEl.innerHTML = '<div class="empty">검색 결과가 없습니다</div>';
-      return;
-    }
-
-    resultsEl.innerHTML = matches.map(s => `
-      <div class="result-card">
-        <div class="result-name">
-          <i class="ti ti-user-circle" style="color:#1D9E75;"></i>
-          ${getName(s)}
-          <span style="font-size:11px;color:#888780;font-weight:400;margin-left:6px;">3-${getCls(s)} / ${getNum(s)}번</span>
-          ${isLeader(s) ? '<span class="badge-inline" style="background:#D4537E;">방장</span>' : ''}
-        </div>
-        <div class="result-info">
-          <div class="item">
-            <div class="label"><i class="ti ti-bus"></i> 호차</div>
-            <div class="value">${getBus(s) || '-'}</div>
-          </div>
-          <div class="item">
-            <div class="label"><i class="ti ti-bed"></i> 숙소</div>
-            <div class="value">${getRoom(s) || '-'}</div>
-          </div>
-        </div>
+    // 검색창
+    html += `
+      <div class="search-section">
+        <input type="text" id="search-input" class="search-input" placeholder="🔍 학생 이름·반-번호로 검색 (예: 강다윤, 1-5)">
+        <div id="search-results" class="search-results"></div>
       </div>
-    `).join('');
-  });
+    `;
 
-  renderClassList('1');
+    // 반별 색상 테마
+    const themes = {
+      '1': { bg: '#FBEAF0', border: '#D4537E', title: '#4B1528', sub: '#993556' },
+      '2': { bg: '#EEEDFE', border: '#7F77DD', title: '#26215C', sub: '#534AB7' },
+      '3': { bg: '#E1F5EE', border: '#1D9E75', title: '#085041', sub: '#0F6E56' },
+      '4': { bg: '#E6F1FB', border: '#378ADD', title: '#042C53', sub: '#185FA5' }
+    };
+
+    // 전체 반 동시 표시
+    ['1', '2', '3', '4'].forEach(cls => {
+      const t = themes[cls];
+      const students = DATA.master
+        .filter(s => getCls(s) === cls)
+        .sort((a, b) => parseInt(getNum(a)) - parseInt(getNum(b)));
+      const joined = students.filter(s => getJoin(s) === 'O');
+      const notJoined = students.filter(s => getJoin(s) !== 'O');
+      const homeroom = HOMEROOM_TEACHERS[cls] || '';
+
+      html += `
+        <div style="margin-bottom: 14px; border: 1px solid #e5e5e0; border-radius: 10px; overflow: hidden;">
+          <div style="padding: 12px 14px; background: ${t.bg}; border-bottom: 1px solid #e5e5e0; display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <div style="font-size: 14px; font-weight: 700; color: ${t.title};">3학년 ${cls}반</div>
+              <div style="font-size: 11px; color: ${t.sub}; margin-top: 2px;">
+                <i class="ti ti-user-star" style="font-size:11px;"></i> 담임: ${homeroom}
+              </div>
+            </div>
+            <div style="font-size: 11px; background: #fff; padding: 4px 10px; border-radius: 11px; color: ${t.sub}; font-weight: 600;">
+              참가 ${joined.length} · 미참가 ${notJoined.length}
+            </div>
+          </div>
+          <div style="padding: 10px; background: #fff;">
+            <div style="display: flex; flex-direction: column; gap: 5px;">
+              ${students.map(s => {
+                const join = getJoin(s) === 'O';
+                const leader = isLeader(s);
+                return `
+                  <div style="display:flex; align-items:center; gap:8px; padding:7px 10px; background:${join ? '#fff' : '#f4f4f1'}; border:0.5px solid #e5e5e0; border-radius:6px; ${!join ? 'opacity:0.5;' : ''}">
+                    <span style="min-width:26px; background:#f4f4f1; padding:3px 0; border-radius:4px; font-size:11px; font-weight:600; text-align:center; color:#5f5e5a;">${String(getNum(s)).padStart(2,'0')}</span>
+                    <span style="font-size:12px; font-weight:600; flex:1;">
+                      ${getName(s)}
+                      ${leader ? '<span class="badge-inline" style="background:#D4537E;">방장</span>' : ''}
+                      ${!join ? '<span class="badge-inline" style="background:#888780;">미참가</span>' : ''}
+                    </span>
+                    ${join ? `<span style="font-size:10px; color:#5f5e5a; text-align:right;">
+                      ${getBus(s) || '-'}<br>${getRoom(s) || '-'}
+                    </span>` : ''}
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </div>
+        </div>
+      `;
+    });
+
+    container.innerHTML = html;
+
+    // 검색 기능
+    const searchInput = document.getElementById('search-input');
+    searchInput.addEventListener('input', () => {
+      const q = searchInput.value.trim().toLowerCase();
+      const resultsEl = document.getElementById('search-results');
+      if (!q) { resultsEl.innerHTML = ''; return; }
+
+      const matches = DATA.master.filter(s => {
+        if (getJoin(s) !== 'O') return false;
+        const name = getName(s).replace(/\s/g, '').toLowerCase();
+        const clsNum = getCls(s) + '-' + getNum(s);
+        const clsNum2 = getCls(s) + '-' + String(getNum(s)).padStart(2, '0');
+        return name.includes(q) || clsNum === q || clsNum2 === q;
+      });
+
+      if (matches.length === 0) {
+        resultsEl.innerHTML = '<div class="empty">검색 결과가 없습니다</div>';
+        return;
+      }
+
+      resultsEl.innerHTML = matches.map(s => `
+        <div class="result-card">
+          <div class="result-name">
+            <i class="ti ti-user-circle" style="color:#1D9E75;"></i>
+            ${getName(s)}
+            <span style="font-size:11px;color:#888780;font-weight:400;margin-left:6px;">3-${getCls(s)} / ${getNum(s)}번</span>
+            ${isLeader(s) ? '<span class="badge-inline" style="background:#D4537E;">방장</span>' : ''}
+          </div>
+          <div class="result-info">
+            <div class="item">
+              <div class="label"><i class="ti ti-bus"></i> 호차</div>
+              <div class="value">${getBus(s) || '-'}</div>
+            </div>
+            <div class="item">
+              <div class="label"><i class="ti ti-bed"></i> 숙소</div>
+              <div class="value">${getRoom(s) || '-'}</div>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    });
   } catch (e) {
     console.error('renderClassView 에러:', e);
     container.innerHTML = '<div style="padding:20px;background:#FCEBEB;color:#A32D2D;border-radius:8px;font-size:12px;"><strong>반별 화면 에러:</strong><br>' + e.message + '<br><br><pre style="font-size:10px;white-space:pre-wrap;">' + (e.stack || '') + '</pre></div>';
   }
-}
-
-function renderClassList(cls) {
-  const listEl = document.getElementById('class-list');
-  const students = DATA.master
-    .filter(s => getCls(s) === cls)
-    .sort((a, b) => parseInt(getNum(a)) - parseInt(getNum(b)));
-
-  if (students.length === 0) {
-    listEl.innerHTML = '<div class="empty">해당 반 학생이 없습니다</div>';
-    return;
-  }
-
-  const joined = students.filter(s => getJoin(s) === 'O');
-  const notJoined = students.filter(s => getJoin(s) !== 'O');
-
-  let html = `
-    <div style="display:flex;gap:10px;margin-bottom:12px;font-size:11px;">
-      <div style="flex:1;background:#E1F5EE;color:#0F6E56;padding:8px 12px;border-radius:7px;text-align:center;">
-        참가 <strong style="font-size:14px;">${joined.length}</strong>명
-      </div>
-      <div style="flex:1;background:#f4f4f1;color:#5f5e5a;padding:8px 12px;border-radius:7px;text-align:center;">
-        미참가 <strong style="font-size:14px;">${notJoined.length}</strong>명
-      </div>
-    </div>
-  `;
-
-  html += `<div style="display:flex;flex-direction:column;gap:6px;">`;
-  students.forEach(s => {
-    const join = getJoin(s) === 'O';
-    const leader = isLeader(s);
-    html += `
-      <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:${join ? '#fff' : '#f4f4f1'};border:1px solid #e5e5e0;border-radius:8px;${!join ? 'opacity:0.55;' : ''}">
-        <div style="min-width:36px;text-align:center;background:#f4f4f1;border-radius:6px;padding:4px 0;font-size:11px;font-weight:600;color:#5f5e5a;">${String(getNum(s)).padStart(2, '0')}</div>
-        <div style="flex:1;">
-          <div style="font-size:13px;font-weight:600;">
-            ${getName(s)}
-            ${leader ? '<span class="badge-inline" style="background:#D4537E;">방장</span>' : ''}
-            ${!join ? '<span class="badge-inline" style="background:#888780;">미참가</span>' : ''}
-          </div>
-          ${join ? `<div style="font-size:11px;color:#5f5e5a;margin-top:2px;">
-            <i class="ti ti-bus" style="font-size:11px;"></i> ${getBus(s) || '-'} ·
-            <i class="ti ti-bed" style="font-size:11px;"></i> ${getRoom(s) || '-'}
-          </div>` : ''}
-        </div>
-      </div>
-    `;
-  });
-  html += `</div>`;
-
-  listEl.innerHTML = html;
 }
 
 // ============ 줌 링크 적용 ============
