@@ -1700,7 +1700,7 @@ function isTeacher() {
   return auth && auth.teacher;
 }
 
-// 반별 뷰 렌더링 (v3 - 완전 재작성)
+// 반별 뷰 렌더링 (v4 - 반 선택 탭)
 function renderClassView() {
   console.log('[ClassView] 호출됨');
   const container = document.getElementById('class-content');
@@ -1717,6 +1717,37 @@ function renderClassView() {
 
   console.log('[ClassView] 학생 수:', DATA.master.length);
 
+  // 반 선택 탭
+  let html = '<div class="day-tabs" id="class-tabs">';
+  ['1', '2', '3', '4'].forEach(cls => {
+    html += '<button class="day-tab" data-cls="' + cls + '">' + cls + '반</button>';
+  });
+  html += '</div>';
+  html += '<div id="class-list"></div>';
+
+  container.innerHTML = html;
+
+  // 탭 클릭 처리
+  container.querySelectorAll('#class-tabs .day-tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      container.querySelectorAll('#class-tabs .day-tab').forEach(t => t.classList.remove('active'));
+      btn.classList.add('active');
+      renderClassList(btn.dataset.cls);
+    });
+  });
+
+  // 기본 1반 표시
+  container.querySelector('#class-tabs .day-tab[data-cls="1"]').classList.add('active');
+  renderClassList('1');
+
+  console.log('[ClassView] 렌더링 완료');
+}
+
+// 특정 반 학생 명단 렌더링
+function renderClassList(cls) {
+  const listEl = document.getElementById('class-list');
+  if (!listEl) return;
+
   const themes = {
     '1': { bg: '#FBEAF0', title: '#4B1528', sub: '#993556' },
     '2': { bg: '#EEEDFE', title: '#26215C', sub: '#534AB7' },
@@ -1724,57 +1755,47 @@ function renderClassView() {
     '4': { bg: '#E6F1FB', title: '#042C53', sub: '#185FA5' }
   };
 
-  let html = '<div style="padding-bottom:8px;">';
+  const t = themes[cls];
+  const students = DATA.master
+    .filter(s => String(getCls(s)) === cls)
+    .sort((a, b) => parseInt(getNum(a) || 0) - parseInt(getNum(b) || 0));
+  const joined = students.filter(s => getJoin(s) === 'O');
+  const notJoined = students.filter(s => getJoin(s) !== 'O');
+  const homeroom = HOMEROOM_TEACHERS[cls] || '';
 
-  ['1', '2', '3', '4'].forEach(cls => {
-    const t = themes[cls];
-    const students = DATA.master
-      .filter(s => String(getCls(s)) === cls)
-      .sort((a, b) => parseInt(getNum(a) || 0) - parseInt(getNum(b) || 0));
-    const joined = students.filter(s => getJoin(s) === 'O');
-    const notJoined = students.filter(s => getJoin(s) !== 'O');
-    const homeroom = HOMEROOM_TEACHERS[cls] || '';
+  let html = '';
 
-    html += '<div style="margin-bottom:14px;border:1px solid #e5e5e0;border-radius:10px;overflow:hidden;">';
-
-    // 헤더
-    html += '<div style="padding:12px 14px;background:' + t.bg + ';display:flex;justify-content:space-between;align-items:center;">';
-    html += '<div>';
-    html += '<div style="font-size:14px;font-weight:700;color:' + t.title + ';">3학년 ' + cls + '반</div>';
-    html += '<div style="font-size:11px;color:' + t.sub + ';margin-top:2px;">담임: ' + homeroom + '</div>';
-    html += '</div>';
-    html += '<div style="font-size:11px;background:#fff;padding:4px 10px;border-radius:11px;color:' + t.sub + ';font-weight:600;">참가 ' + joined.length + ' · 미참가 ' + notJoined.length + '</div>';
-    html += '</div>';
-
-    // 학생 명단
-    html += '<div style="padding:10px;background:#fff;">';
-    if (students.length === 0) {
-      html += '<div style="text-align:center;color:#888780;font-size:12px;padding:8px;">학생 데이터가 없습니다</div>';
-    } else {
-      students.forEach(s => {
-        const join = getJoin(s) === 'O';
-        const num = String(getNum(s) || '').padStart(2, '0');
-        const name = getName(s) || '-';
-        const bus = getBus(s) || '-';
-        const room = getRoom(s) || '-';
-
-        html += '<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:' + (join ? '#fff' : '#f4f4f1') + ';border:0.5px solid #e5e5e0;border-radius:6px;margin-bottom:4px;' + (!join ? 'opacity:0.5;' : '') + '">';
-        html += '<span style="min-width:28px;background:#f4f4f1;padding:3px 0;border-radius:4px;font-size:11px;font-weight:600;text-align:center;color:#5f5e5a;">' + num + '</span>';
-        html += '<span style="font-size:12px;font-weight:600;flex:1;">' + name + (join ? '' : ' <span style="font-size:9px;color:#888780;">(미참가)</span>') + '</span>';
-        if (join) {
-          html += '<span style="font-size:10px;color:#5f5e5a;text-align:right;line-height:1.4;">' + bus + '<br>' + room + '</span>';
-        }
-        html += '</div>';
-      });
-    }
-    html += '</div>';
-    html += '</div>';
-  });
-
+  // 반 정보 헤더
+  html += '<div style="margin-bottom:14px;padding:14px 16px;background:' + t.bg + ';border-radius:10px;display:flex;justify-content:space-between;align-items:center;">';
+  html += '<div>';
+  html += '<div style="font-size:15px;font-weight:700;color:' + t.title + ';">3학년 ' + cls + '반</div>';
+  html += '<div style="font-size:12px;color:' + t.sub + ';margin-top:3px;">담임: ' + homeroom + '</div>';
+  html += '</div>';
+  html += '<div style="font-size:11px;background:#fff;padding:5px 11px;border-radius:11px;color:' + t.sub + ';font-weight:600;">참가 ' + joined.length + ' · 미참가 ' + notJoined.length + '</div>';
   html += '</div>';
 
-  container.innerHTML = html;
-  console.log('[ClassView] 렌더링 완료');
+  // 학생 명단
+  if (students.length === 0) {
+    html += '<div style="text-align:center;color:#888780;font-size:12px;padding:20px;">학생 데이터가 없습니다</div>';
+  } else {
+    students.forEach(s => {
+      const join = getJoin(s) === 'O';
+      const num = String(getNum(s) || '').padStart(2, '0');
+      const name = getName(s) || '-';
+      const bus = getBus(s) || '-';
+      const room = getRoom(s) || '-';
+
+      html += '<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:' + (join ? '#fff' : '#f4f4f1') + ';border:1px solid #e5e5e0;border-radius:8px;margin-bottom:5px;' + (!join ? 'opacity:0.5;' : '') + '">';
+      html += '<span style="min-width:32px;background:#f4f4f1;padding:5px 0;border-radius:6px;font-size:12px;font-weight:600;text-align:center;color:#5f5e5a;">' + num + '</span>';
+      html += '<span style="font-size:13px;font-weight:600;flex:1;">' + name + (join ? '' : ' <span style="font-size:10px;color:#888780;">(미참가)</span>') + '</span>';
+      if (join) {
+        html += '<span style="font-size:11px;color:#5f5e5a;text-align:right;line-height:1.4;">' + bus + '<br>' + room + '</span>';
+      }
+      html += '</div>';
+    });
+  }
+
+  listEl.innerHTML = html;
 }
 
 // ============ 줌 링크 적용 ============
@@ -1839,15 +1860,9 @@ function updateLiveStatus() {
     return;
   }
 
-  const auth = getStoredAuth();
-  if (!auth) {
-    showAuthModal();
-  } else if (auth.teacher) {
-    enterTeacherMode();
-  } else {
-    renderBus();
-    renderRoom();
-  }
+  // 매번 로그인 화면을 띄우되, 이전 입력값은 자동 채워넣음
+  clearStoredAuth();
+  showAuthModal();
 })();
 </script>
 </body>
