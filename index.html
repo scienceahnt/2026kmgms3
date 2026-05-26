@@ -657,6 +657,73 @@
     color: #888780;
     font-size: 12px;
   }
+  /* 오픈채팅 카드 */
+  .openchat-card {
+    display: block;
+    text-decoration: none;
+    margin-top: 20px;
+    margin-bottom: 8px;
+  }
+  .openchat-box {
+    padding: 14px 16px;
+    background: #FEE500;
+    border-radius: 12px;
+  }
+  .openchat-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+  .openchat-icon {
+    width: 36px;
+    height: 36px;
+    background: #3C1E1E;
+    border-radius: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #FEE500;
+    font-size: 18px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .openchat-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: #3C1E1E;
+  }
+  .openchat-subtitle {
+    font-size: 11px;
+    color: #5D3636;
+    margin-top: 1px;
+  }
+  .openchat-notice {
+    font-size: 11px;
+    color: #3C1E1E;
+    line-height: 1.6;
+    padding: 8px 10px;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 7px;
+  }
+  .openchat-btn {
+    margin-top: 10px;
+    padding: 9px 12px;
+    background: #3C1E1E;
+    border-radius: 7px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .openchat-btn span {
+    font-size: 12px;
+    font-weight: 600;
+    color: #FEE500;
+  }
+  .openchat-btn i {
+    color: #FEE500;
+    font-size: 13px;
+  }
   /* 알림 */
   .notice {
     font-size: 11px;
@@ -973,6 +1040,27 @@
     </div>
 
     <div class="notice">※ 상기 일정은 기상 및 현지사정에 의하여 변경될 수 있습니다</div>
+
+    <!-- 학년부장 오픈채팅 -->
+    <a class="openchat-card" href="https://open.kakao.com/o/soWyBcwi" target="_blank" rel="noopener">
+      <div class="openchat-box">
+        <div class="openchat-header">
+          <div class="openchat-icon">💬</div>
+          <div style="flex:1;">
+            <div class="openchat-title">학년부장 1:1 오픈채팅</div>
+            <div class="openchat-subtitle">담임선생님과 연락이 안 될 때</div>
+          </div>
+        </div>
+        <div class="openchat-notice">
+          ⏰ 체험학습 진행 중에는 답변이 늦을 수 있습니다.<br>
+          급한 경우 담임선생님께 먼저 연락 부탁드립니다.
+        </div>
+        <div class="openchat-btn">
+          <span><i class="ti ti-message-circle"></i> 카카오톡 오픈채팅 열기</span>
+          <i class="ti ti-arrow-right"></i>
+        </div>
+      </div>
+    </a>
   </div>
 
   <!-- 컨텐츠: 호차 -->
@@ -1023,6 +1111,27 @@
         · 음성 없이도 영상 시청이 가능합니다<br>
         · 자녀 응원 메시지는 채팅으로 보내주세요
       </div>
+
+      <!-- 학년부장 오픈채팅 -->
+      <a class="openchat-card" href="https://open.kakao.com/o/soWyBcwi" target="_blank" rel="noopener">
+        <div class="openchat-box">
+          <div class="openchat-header">
+            <div class="openchat-icon">💬</div>
+            <div style="flex:1;">
+              <div class="openchat-title">학년부장 1:1 오픈채팅</div>
+              <div class="openchat-subtitle">담임선생님과 연락이 안 될 때</div>
+            </div>
+          </div>
+          <div class="openchat-notice">
+            ⏰ 체험학습 진행 중에는 답변이 늦을 수 있습니다.<br>
+            급한 경우 담임선생님께 먼저 연락 부탁드립니다.
+          </div>
+          <div class="openchat-btn">
+            <span><i class="ti ti-message-circle"></i> 카카오톡 오픈채팅 열기</span>
+            <i class="ti ti-arrow-right"></i>
+          </div>
+        </div>
+      </a>
     </div>
   </div>
 
@@ -1085,6 +1194,33 @@ const SHEET_URLS = {
 const ZOOM_LINK = "https://us06web.zoom.us/launch/jc/83750549462";
 const LIVE_START = new Date("2026-05-27T19:30:00+09:00");
 const LIVE_END = new Date("2026-05-27T21:00:00+09:00");
+
+// ============ 학년부장 1:1 오픈채팅 ============
+const OPENCHAT_LINK = "https://open.kakao.com/o/soWyBcwi";
+
+function getOpenChatCardHTML() {
+  return `
+    <a class="openchat-card" href="${OPENCHAT_LINK}" target="_blank" rel="noopener">
+      <div class="openchat-box">
+        <div class="openchat-header">
+          <div class="openchat-icon">💬</div>
+          <div style="flex:1;">
+            <div class="openchat-title">학년부장 1:1 오픈채팅</div>
+            <div class="openchat-subtitle">담임선생님과 연락이 안 될 때</div>
+          </div>
+        </div>
+        <div class="openchat-notice">
+          ⏰ 체험학습 진행 중에는 답변이 늦을 수 있습니다.<br>
+          급한 경우 담임선생님께 먼저 연락 부탁드립니다.
+        </div>
+        <div class="openchat-btn">
+          <span><i class="ti ti-message-circle"></i> 카카오톡 오픈채팅 열기</span>
+          <i class="ti ti-arrow-right"></i>
+        </div>
+      </div>
+    </a>
+  `;
+}
 
 // ============ 교사용 인증 해시 (SHA-256: "반-뒷4자리") ============
 const TEACHER_HASHES = [
@@ -1446,6 +1582,7 @@ function renderBus() {
     `;
   });
 
+  html += getOpenChatCardHTML();
   container.innerHTML = html;
 }
 
@@ -1586,11 +1723,13 @@ function renderRoomList(bld) {
         `;
       });
 
+      html += getOpenChatCardHTML();
       listEl.innerHTML = html;
       return;
     } else {
       // 학생 모드에서 1동 클릭 - 사실상 학생용 1동 객실은 없음
       html += `<div class="empty">1동에 배정된 방이 없습니다</div>`;
+      html += getOpenChatCardHTML();
       listEl.innerHTML = html;
       return;
     }
@@ -1600,6 +1739,7 @@ function renderRoomList(bld) {
 
   if (sortedRooms.length === 0) {
     html += `<div class="empty">${bld}동에 배정된 방이 없습니다</div>`;
+    html += getOpenChatCardHTML();
     listEl.innerHTML = html;
     return;
   }
@@ -1642,6 +1782,7 @@ function renderRoomList(bld) {
     `;
   });
 
+  html += getOpenChatCardHTML();
   listEl.innerHTML = html;
 }
 
@@ -1795,6 +1936,7 @@ function renderClassList(cls) {
     });
   }
 
+  html += getOpenChatCardHTML();
   listEl.innerHTML = html;
 }
 
